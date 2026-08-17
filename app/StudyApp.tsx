@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { beijingDate, dueReviews, rollStateToToday } from "@/lib/study-state";
+import { beijingDate, dueReviews, normalizedAnswer, rollStateToToday } from "@/lib/study-state";
 import type {
   ExerciseItem,
   GradeResult,
@@ -545,7 +545,16 @@ function QuizView({
   const [results, setResults] = useState<GradeResult[] | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [correctionAnswers, setCorrectionAnswers] = useState<Record<string, string>>({});
+  const [correctionFeedback, setCorrectionFeedback] = useState<Record<string, "wrong" | "correct">>({});
+  const [correctedKeys, setCorrectedKeys] = useState<string[]>([]);
   const completedOnce = useRef(false);
+
+  const completeOnce = (gradedResults: GradeResult[]) => {
+    if (completedOnce.current) return;
+    completedOnce.current = true;
+    onComplete(gradedResults);
+  };
 
   useEffect(() => {
     if (!results) localStorage.setItem(draftKey, JSON.stringify(answers));
@@ -576,10 +585,8 @@ function QuizView({
       if (!response.ok || !payload.results) throw new Error(payload.error || "提交失败");
       setResults(payload.results);
       localStorage.removeItem(draftKey);
-      if (!completedOnce.current) {
-        completedOnce.current = true;
-        onComplete(payload.results);
-      }
+      const hasWrongWordSpelling = payload.results.some((item) => item.kind === "word_spelling" && !item.correct);
+      if (!hasWrongWordSpelling) completeOnce(payload.results);
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "网络错误，请稍后重试");
     } finally {
@@ -589,11 +596,30 @@ function QuizView({
 
   const resultMap = useMemo(() => new Map(results?.map((item) => [`${item.kind}:${item.id}`, item]) ?? []), [results]);
   const correctCount = results?.filter((item) => item.correct).length ?? 0;
+  const wrongWordResults = useMemo(
+    () => results?.filter((item) => item.kind === "word_spelling" && !item.correct) ?? [],
+    [results],
+  );
+  const pendingCorrectionCount = wrongWordResults.filter((item) => !correctedKeys.includes(`${item.kind}:${item.id}`)).length;
+
+  const submitCorrection = (result: GradeResult) => {
+    const key = `${result.kind}:${result.id}`;
+    const correction = correctionAnswers[key] ?? "";
+    const correct = normalizedAnswer(correction) === normalizedAnswer(result.expected);
+    setCorrectionFeedback((current) => ({ ...current, [key]: correct ? "correct" : "wrong" }));
+    if (correct) {
+      const nextCorrectedKeys = correctedKeys.includes(key) ? correctedKeys : [...correctedKeys, key];
+      setCorrectedKeys(nextCorrectedKeys);
+      if (results && wrongWordResults.every((item) => nextCorrectedKeys.includes(`${item.kind}:${item.id}`))) {
+        completeOnce(results);
+      }
+    }
+  };
 
   return (
     <section className="quiz-page">
       <div className="section-intro"><span className="pill">整组提交 · {quizQuestions.length} 题</span><h2>{title}</h2><p>{description}</p></div>
-      {results && <section className="result-summary"><div><span>本组成绩</span><strong>{correctCount} / {results.length}</strong></div><p>{correctCount === results.length ? "全部正确，这一组很稳。" : `有 ${results.length - correctCount} 题已加入对应的错题类别，下面已给出完整解释。`}</p></section>}
+      {results && <section className="result-summary"><div><span>本组成绩</span><strong>{correctCount} / {results.length}</strong></div><p>{correctCount === results.length ? "全部正确，这一组很稳。" : wrongWordResults.length > 0 ? `有 ${wrongWordResults.length} 个单词需要订正。本轮每个错词只记 1 次，订正中的错误不会重复计数。` : `有 ${results.length - correctCount} 题已加入对应的错题类别，下面已给出完整解释。`}</p></section>}
       <div className="question-list">
         {quizQuestions.map((question, index) => {
           const key = `${question.kind}:${question.id}`;
@@ -604,13 +630,33 @@ function QuizView({
               <p className="question-prompt">{question.prompt}</p>
               <label><span>{question.label}</span><input autoComplete="off" spellCheck={false} disabled={Boolean(results)} value={answers[key] ?? ""} onChange={(event) => setAnswers((current) => ({ ...current, [key]: event.target.value }))} /></label>
               {result && !result.correct && <WrongExplanation result={result} />}
+              {result && !result.correct && result.kind === "word_spelling" && (
+                <div className={`correction-box ${correctedKeys.includes(key) ? "correct" : correctionFeedback[key] === "wrong" ? "wrong" : ""}`}>
+                  <label>
+                    <span>{correctedKeys.includes(key) ? "订正完成" : "请重新拼写这个单词，正确后才能继续："}</span>
+                    <input
+                      autoComplete="off"
+                      spellCheck={false}
+                      disabled={correctedKeys.includes(key)}
+                      value={correctionAnswers[key] ?? ""}
+                      onChange={(event) => setCorrectionAnswers((current) => ({ ...current, [key]: event.target.value }))}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && (correctionAnswers[key] ?? "").trim()) submitCorrection(result);
+                      }}
+                    />
+                  </label>
+                  {!correctedKeys.includes(key) && <button className="secondary-button" disabled={!(correctionAnswers[key] ?? "").trim()} onClick={() => submitCorrection(result)}>确认订正</button>}
+                  {correctionFeedback[key] === "wrong" && <p className="correction-message wrong" role="alert">仍不正确。正确拼写是 <strong>{result.expected}</strong>，请重新输入。</p>}
+                  {correctionFeedback[key] === "correct" && <p className="correction-message correct">订正正确。这次订正不会增加错误次数。</p>}
+                </div>
+              )}
             </article>
           );
         })}
       </div>
       {error && <p className="form-error" role="alert">{error}</p>}
       <div className="quiz-submit">
-        {!results ? <button className="primary-button" disabled={submitting || !quizQuestions.length} onClick={submit}>{submitting ? "正在统一批改…" : `提交整组 ${quizQuestions.length} 题`}</button> : <button className="primary-button" onClick={onNext}>{nextLabel} →</button>}
+        {!results ? <button className="primary-button" disabled={submitting || !quizQuestions.length} onClick={submit}>{submitting ? "正在统一批改…" : `提交整组 ${quizQuestions.length} 题`}</button> : <button className="primary-button" disabled={pendingCorrectionCount > 0} onClick={onNext}>{pendingCorrectionCount > 0 ? `还需订正 ${pendingCorrectionCount} 个单词` : `${nextLabel} →`}</button>}
         {!results && <small>大小写和首尾空格不影响判定；拼写、词形、词序和介词严格检查。</small>}
       </div>
     </section>

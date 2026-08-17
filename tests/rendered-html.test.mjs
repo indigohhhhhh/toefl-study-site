@@ -57,3 +57,8 @@ test("strict normalizer ignores case, spacing, and trailing item numbers only", 
   assert.notEqual(normalizedAnswer("adapt in"), normalizedAnswer("Adapt to"));
   assert.notEqual(normalizedAnswer("servive"), normalizedAnswer("survive"));
 });
+
+test("word spelling correction uses the same strict comparison", () => {
+  assert.equal(normalizedAnswer(" Erosion 25 "), normalizedAnswer("erosion"));
+  assert.notEqual(normalizedAnswer("errosion"), normalizedAnswer("erosion"));
+});
