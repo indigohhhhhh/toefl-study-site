@@ -62,6 +62,20 @@ test("decouples original Part 3 from the six-step daily phrase flow", async () =
   assert.match(source, /原资料 Part 3/);
 });
 
+test("allows continuous learning without assigning future-day credits", async () => {
+  const [source, types, state] = await Promise.all([
+    readFile(new URL("../app/StudyApp.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/study-types.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/study-state.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(source, /startContinuousLearning/);
+  assert.match(source, /继续学习/);
+  assert.match(source, /completion === "vocabularyCloze" && activePhrases\.length === 0/);
+  assert.doesNotMatch(source, /已提前|预计明日复习量/);
+  assert.match(types, /continuousLearning: boolean/);
+  assert.match(state, /continuousLearning: false/);
+});
+
 test("strict normalizer ignores case, spacing, and trailing item numbers only", () => {
   assert.equal(normalizedAnswer("  CLIMATIC   16 "), "climatic");
   assert.equal(normalizedAnswer("  Adapt   to  4 "), "adapt to");

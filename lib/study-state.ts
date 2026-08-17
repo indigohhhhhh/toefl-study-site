@@ -51,6 +51,7 @@ export function createInitialState(date = beijingDate()): StudyState {
     daily: {
       date,
       submitted: false,
+      continuousLearning: false,
       completed: {
         reviews: false,
         vocabularyLearn: false,
@@ -71,15 +72,17 @@ export function rollStateToToday(state: StudyState, date = beijingDate()): Study
   const normalized = {
     ...state,
     progress: { ...state.progress, comprehensiveExerciseNextIndex },
+    daily: { ...state.daily, continuousLearning: state.daily.continuousLearning === true },
   };
   if (normalized.daily.date === date) return normalized;
+  const carryContinuousLearning = normalized.daily.continuousLearning;
   return {
     ...normalized,
     updatedAt: new Date().toISOString(),
     settings: {
       ...normalized.settings,
-      temporaryVocabularySize: null,
-      temporaryPhraseSize: null,
+      temporaryVocabularySize: carryContinuousLearning ? normalized.settings.temporaryVocabularySize : null,
+      temporaryPhraseSize: carryContinuousLearning ? normalized.settings.temporaryPhraseSize : null,
     },
     progress: {
       ...normalized.progress,
@@ -90,13 +93,14 @@ export function rollStateToToday(state: StudyState, date = beijingDate()): Study
     daily: {
       date,
       submitted: false,
+      continuousLearning: carryContinuousLearning,
       completed: {
         reviews: false,
-        vocabularyLearn: false,
-        vocabularySpelling: false,
-        vocabularyCloze: false,
-        phraseLearn: false,
-        phraseSpelling: false,
+        vocabularyLearn: carryContinuousLearning ? normalized.daily.completed.vocabularyLearn : false,
+        vocabularySpelling: carryContinuousLearning ? normalized.daily.completed.vocabularySpelling : false,
+        vocabularyCloze: carryContinuousLearning ? normalized.daily.completed.vocabularyCloze : false,
+        phraseLearn: carryContinuousLearning ? normalized.daily.completed.phraseLearn : false,
+        phraseSpelling: carryContinuousLearning ? normalized.daily.completed.phraseSpelling : false,
       },
     },
   };

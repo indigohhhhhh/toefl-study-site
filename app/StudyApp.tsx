@@ -230,7 +230,9 @@ export default function StudyApp({
       let progress = { ...current.progress, reviews: nextReviews };
       let settings = current.settings;
       let submitted = current.daily.submitted;
-      if (completion === "phraseSpelling") {
+      const completesBatch = completion === "phraseSpelling"
+        || (completion === "vocabularyCloze" && activePhrases.length === 0);
+      if (completesBatch) {
         const currentWordCount = current.settings.temporaryVocabularySize ?? current.settings.vocabularyBatchSize;
         const currentPhraseCount = current.settings.temporaryPhraseSize ?? current.settings.phraseBatchSize;
         const learnedWords = Array.from({ length: currentWordCount }, (_, index) => current.progress.vocabularyNextIndex + index)
@@ -252,9 +254,30 @@ export default function StudyApp({
         ...current,
         settings,
         progress,
-        daily: { ...current.daily, completed, submitted },
+        daily: { ...current.daily, completed, submitted, continuousLearning: completesBatch ? false : current.daily.continuousLearning },
       };
     });
+  };
+
+  const startContinuousLearning = () => {
+    if (!state.daily.submitted || reviewsDue.length > 0 || (!activeWords.length && !activePhrases.length)) return;
+    updateState((current) => ({
+      ...current,
+      daily: {
+        ...current.daily,
+        continuousLearning: true,
+        completed: {
+          reviews: true,
+          vocabularyLearn: false,
+          vocabularySpelling: false,
+          vocabularyCloze: false,
+          phraseLearn: false,
+          phraseSpelling: false,
+        },
+      },
+    }));
+    setView(activeWords.length ? "word-learn" : "phrase-learn");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleComprehensiveResults = (results: GradeResult[]) => {
@@ -312,8 +335,23 @@ export default function StudyApp({
     label: "填写完整英文答案：",
   })), `comprehensive:${comprehensiveStart}`), [activeComprehensiveExercises, comprehensiveStart]);
 
+  const nextLearningView = (): View => {
+    const completed = state.daily.completed;
+    if (activeWords.length) {
+      if (!completed.vocabularyLearn) return "word-learn";
+      if (!completed.vocabularySpelling) return "word-quiz";
+      if (!completed.vocabularyCloze) return "word-cloze";
+    }
+    if (activePhrases.length) {
+      if (!completed.phraseLearn) return "phrase-learn";
+      if (!completed.phraseSpelling) return "phrase-quiz";
+    }
+    return "today";
+  };
+
   const navigate = (target: View) => {
-    if (target === "word-learn" && reviewsDue.length === 0 && !state.daily.completed.reviews) {
+    const learningViews: View[] = ["word-learn", "word-quiz", "word-cloze", "phrase-learn", "phrase-quiz"];
+    if (learningViews.includes(target) && reviewsDue.length === 0 && !state.daily.completed.reviews) {
       setCompleted("reviews");
     }
     setView(target);
@@ -331,13 +369,13 @@ export default function StudyApp({
   };
 
   const page = (() => {
-    if (view === "today") return <Dashboard state={state} reviewsDue={reviewsDue.length} activeWords={activeWords} activePhrases={activePhrases} navigate={navigate} updateState={updateState} />;
+    if (view === "today") return <Dashboard state={state} reviewsDue={reviewsDue.length} activeWords={activeWords} activePhrases={activePhrases} navigate={navigate} updateState={updateState} onContinue={startContinuousLearning} />;
     if (view === "word-learn") return <WordLearning items={activeWords} onDone={() => { setCompleted("vocabularyLearn"); navigate("word-quiz"); }} />;
     if (view === "phrase-learn") return <PhraseLearning items={activePhrases} onDone={() => { setCompleted("phraseLearn"); navigate("phrase-quiz"); }} />;
-    if (view === "review-quiz") return <QuizView key="review-quiz" title="到期错题复查" description="顺序已打乱。只填写英文，不提供首字母或长度提示。" questions={reviewQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "reviews")} onNext={() => navigate("word-learn")} nextLabel="继续学习新单词" />;
+    if (view === "review-quiz") return <QuizView key="review-quiz" title="到期错题复查" description="顺序已打乱。只填写英文，不提供首字母或长度提示。" questions={reviewQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "reviews")} onNext={() => navigate(nextLearningView())} nextLabel={nextLearningView() === "word-learn" ? "继续学习新单词" : nextLearningView() === "word-quiz" ? "继续单词拼写" : nextLearningView() === "word-cloze" ? "继续单词例句填空" : nextLearningView() === "phrase-learn" ? "继续学习新词组" : nextLearningView() === "phrase-quiz" ? "继续词组拼写" : "返回今日首页"} />;
     if (view === "word-quiz") return <QuizView key="word-quiz" title="单词无提示拼写" description="整组提交后统一批改；不提示首字母、字母数量或下划线。" questions={wordSpellingQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "vocabularySpelling")} onNext={() => navigate("word-cloze")} nextLabel="开始单词例句填空" />;
-    if (view === "word-cloze") return <QuizView key="word-cloze" title="单词例句填空" description="请根据语法和语境填写完整单词。题面使用“已给字母  [还需字母数]”格式。" questions={wordClozeQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "vocabularyCloze")} onNext={() => navigate("phrase-learn")} nextLabel="开始学习词组" />;
-    if (view === "phrase-quiz") return <QuizView key="phrase-quiz" title="词组无提示拼写" description="必须写出完整搭配；词序、介词和词形都参与判定。提交后即完成今天的学习。" questions={phraseSpellingQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "phraseSpelling")} onNext={() => navigate("today")} nextLabel="完成今天的学习" />;
+    if (view === "word-cloze") return <QuizView key="word-cloze" title="单词例句填空" description="请根据语法和语境填写完整单词。题面使用“已给字母  [还需字母数]”格式。" questions={wordClozeQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "vocabularyCloze")} onNext={() => navigate(activePhrases.length ? "phrase-learn" : "today")} nextLabel={activePhrases.length ? "开始学习词组" : "完成本轮学习"} />;
+    if (view === "phrase-quiz") return <QuizView key="phrase-quiz" title="词组无提示拼写" description="必须写出完整搭配；词序、介词和词形都参与判定。提交后即完成本轮学习。" questions={phraseSpellingQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "phraseSpelling")} onNext={() => navigate("today")} nextLabel="完成本轮学习" />;
     if (view === "comprehensive-practice") return <QuizView key={`comprehensive-${comprehensiveStart}`} title={`综合填词练习 · 第 ${comprehensiveStart}—${comprehensiveStart + activeComprehensiveExercises.length - 1} 题`} description="原资料 Part 3：根据句子中已给出的字母和缺失数量，填写完整英文单词。此处进度与每日词组学习分开保存。" questions={comprehensiveExerciseQuestions} date={state.daily.date} online={online} onComplete={handleComprehensiveResults} onNext={() => { setComprehensiveBatchStart(null); navigate("phrases"); }} nextLabel="返回词组库" />;
     if (view === "words") return <WordLibrary items={vocabulary} learned={state.progress.learnedVocabulary} />;
     if (view === "phrases") return <PhraseLibrary items={phrases} learned={state.progress.learnedPhrases} exerciseNextIndex={comprehensiveExerciseNextIndex} totalExercises={exercises.length} onStartComprehensive={() => { if (!comprehensiveUnlocked || comprehensiveExerciseNextIndex > exercises.length) return; setComprehensiveBatchStart(comprehensiveExerciseNextIndex); navigate("comprehensive-practice"); }} />;
@@ -434,6 +472,7 @@ function Dashboard({
   activePhrases,
   navigate,
   updateState,
+  onContinue,
 }: {
   state: StudyState;
   reviewsDue: number;
@@ -441,32 +480,44 @@ function Dashboard({
   activePhrases: PhraseItem[];
   navigate(view: View): void;
   updateState(change: (current: StudyState) => StudyState): void;
+  onContinue(): void;
 }) {
   const completed = state.daily.completed;
-  const taskValues = [completed.reviews, completed.vocabularyLearn, completed.vocabularySpelling, completed.vocabularyCloze, completed.phraseLearn, completed.phraseSpelling];
-  const progress = state.daily.submitted ? 100 : Math.round((taskValues.filter(Boolean).length / taskValues.length) * 100);
-  const next = !completed.reviews && reviewsDue > 0
+  const reviewDone = completed.reviews || reviewsDue === 0;
+  const contentExhausted = activeWords.length === 0 && activePhrases.length === 0;
+  const betweenBatches = state.daily.submitted && !state.daily.continuousLearning;
+  const tasks: Array<[string, string, boolean]> = betweenBatches
+    ? [
+        ["到期错词与错题", "本轮开始前已完成", true],
+        ["本轮学习任务", contentExhausted ? "全部学习资料已完成" : "已完成，可以继续下一批", true],
+      ]
+    : [["到期错词与错题", reviewsDue ? `${reviewsDue} 项` : "今日无到期", reviewDone]];
+  if (!betweenBatches && activeWords.length) {
+    tasks.push(["学习新单词", `${activeWords.length} 个`, completed.vocabularyLearn], ["单词无提示拼写", `${activeWords.length} 题`, completed.vocabularySpelling], ["单词例句填空", `${activeWords.length} 题`, completed.vocabularyCloze]);
+  }
+  if (!betweenBatches && activePhrases.length) {
+    tasks.push(["学习新词组", `${activePhrases.length} 个`, completed.phraseLearn], ["词组无提示拼写", `${activePhrases.length} 题`, completed.phraseSpelling]);
+  }
+  const taskValues = tasks.map((task) => task[2]);
+  const progress = betweenBatches ? 100 : Math.round((taskValues.filter(Boolean).length / taskValues.length) * 100);
+  const canContinue = betweenBatches && reviewsDue === 0 && !contentExhausted;
+  const next = betweenBatches
+    ? contentExhausted
+      ? { title: "全部学习资料已经完成", detail: "800 个单词和 100 个词组都已学完，之后仍可继续完成到期复习和综合填词。", action: "查看进度", view: "progress" as View }
+      : { title: "本轮任务已完成，还要继续吗？", detail: `下一批可以学习 ${activeWords.length ? `${activeWords.length} 个单词` : ""}${activeWords.length && activePhrases.length ? "和" : ""}${activePhrases.length ? `${activePhrases.length} 个词组` : ""}，完成后还可以再次继续。`, action: "继续学习", view: "today" as View }
+    : !reviewDone && reviewsDue > 0
     ? { title: `先复习 ${reviewsDue} 个到期错词/错题`, detail: "错词会按间隔重复检查，连续多次正确后才暂时停止。", action: "开始复习", view: "review-quiz" as View }
-    : !completed.vocabularyLearn
+    : activeWords.length > 0 && !completed.vocabularyLearn
       ? { title: `学习第 ${activeWords[0]?.index ?? "—"}—${activeWords.at(-1)?.index ?? "—"} 词`, detail: `今天学习 ${activeWords.length} 个新单词，当前批次完成后才会开放下一批。`, action: "开始学习", view: "word-learn" as View }
-      : !completed.vocabularySpelling
+      : activeWords.length > 0 && !completed.vocabularySpelling
         ? { title: "完成单词无提示拼写", detail: "顺序打乱，整组提交后统一批改。", action: "开始拼写", view: "word-quiz" as View }
-        : !completed.vocabularyCloze
+        : activeWords.length > 0 && !completed.vocabularyCloze
           ? { title: "完成单词例句填空", detail: "在真实语境中检查词义、词形与拼写。", action: "开始填空", view: "word-cloze" as View }
-          : !completed.phraseLearn
+          : activePhrases.length > 0 && !completed.phraseLearn
             ? { title: `学习 ${activePhrases.length} 个完整词组`, detail: "词组与单词分开记录，不会因包含相同单词而合并。", action: "学习词组", view: "phrase-learn" as View }
-            : !completed.phraseSpelling
+            : activePhrases.length > 0 && !completed.phraseSpelling
               ? { title: "完成词组无提示拼写", detail: "完整搭配、词序和介词都必须正确。", action: "开始拼写", view: "phrase-quiz" as View }
-              : { title: "今天的任务已完成", detail: "新一批不会提前累积，明天登录后再继续。", action: "查看进度", view: "progress" as View };
-
-  const tasks = [
-    ["到期错词与错题", reviewsDue ? `${reviewsDue} 项` : "今日无到期", completed.reviews],
-    ["学习新单词", `${activeWords.length} 个`, completed.vocabularyLearn],
-    ["单词无提示拼写", `${activeWords.length} 题`, completed.vocabularySpelling],
-    ["单词例句填空", `${activeWords.length} 题`, completed.vocabularyCloze],
-    ["学习新词组", `${activePhrases.length} 个`, completed.phraseLearn],
-    ["词组无提示拼写", `${activePhrases.length} 题`, completed.phraseSpelling],
-  ] as const;
+              : { title: "全部学习资料已经完成", detail: "今天没有新的学习内容，仍可按日期完成到期复习。", action: "查看进度", view: "progress" as View };
 
   const changeWordSize = (size: number) => updateState((current) => ({
     ...current,
@@ -481,17 +532,17 @@ function Dashboard({
     <>
       <section className="hero-card">
         <div className="hero-copy">
-          <span className="pill">{state.daily.submitted ? "今日完成" : "当前任务"}</span>
+          <span className="pill">{betweenBatches ? "本轮完成" : state.daily.continuousLearning ? "自主加学" : "当前任务"}</span>
           <h2>{next.title}</h2>
           <p>{next.detail}</p>
-          <div className="hero-actions"><button className="primary-button" onClick={() => navigate(next.view)}>{next.action} <span>→</span></button></div>
+          <div className="hero-actions"><button className="primary-button" onClick={() => canContinue ? onContinue() : navigate(next.view)}>{next.action} <span>→</span></button></div>
         </div>
         <div className="progress-ring" style={{ "--progress": `${progress}%` } as React.CSSProperties} aria-label={`今日进度 ${progress}%`}><strong>{progress}%</strong><span>今日进度</span></div>
       </section>
 
       <div className="content-grid">
         <section className="panel task-panel">
-          <div className="panel-heading"><div><span className="eyebrow">学习路线</span><h2>今日任务</h2></div><span className="quiet">{taskValues.filter(Boolean).length} / {tasks.length}</span></div>
+          <div className="panel-heading"><div><span className="eyebrow">学习路线</span><h2>{state.daily.continuousLearning ? "本轮自主学习" : "今日任务"}</h2></div><span className="quiet">{taskValues.filter(Boolean).length} / {tasks.length}</span></div>
           <div className="task-list">
             {tasks.map(([label, detail, done], index) => {
               const firstIncomplete = tasks.findIndex((task) => !task[2]);
@@ -502,12 +553,12 @@ function Dashboard({
 
         <aside className="right-column">
           <section className="panel reduction-panel">
-            <span className="eyebrow">临时减量</span><h2>今天可以少学，但不积压</h2>
-            <p>只改变今天这一批，明天自动恢复默认数量。</p>
-            <div className="choice-group"><strong>单词</strong>{[5, 10, 15].map((size) => <button disabled={completed.vocabularyLearn} className={activeWords.length === size ? "selected" : ""} onClick={() => changeWordSize(size)} key={size}>{size} 个</button>)}</div>
-            <div className="choice-group"><strong>词组</strong>{[3, 5, 10].map((size) => <button disabled={completed.phraseLearn} className={activePhrases.length === size ? "selected" : ""} onClick={() => changePhraseSize(size)} key={size}>{size} 个</button>)}</div>
+            <span className="eyebrow">{betweenBatches ? "下一批" : "本轮数量"}</span><h2>{betweenBatches ? "选择后继续学习" : "可以临时调整数量"}</h2>
+            <p>{betweenBatches ? "默认是 15 个单词和 10 个词组；完成后仍可继续下一批。" : "只改变当前这一批，完成后恢复默认数量。"}</p>
+            {activeWords.length > 0 && <div className="choice-group"><strong>单词</strong>{[5, 10, 15].map((size) => <button disabled={!betweenBatches && completed.vocabularyLearn} className={activeWords.length === size ? "selected" : ""} onClick={() => changeWordSize(size)} key={size}>{size} 个</button>)}</div>}
+            {activePhrases.length > 0 && <div className="choice-group"><strong>词组</strong>{[3, 5, 10].map((size) => <button disabled={!betweenBatches && completed.phraseLearn} className={activePhrases.length === size ? "selected" : ""} onClick={() => changePhraseSize(size)} key={size}>{size} 个</button>)}</div>}
           </section>
-          {!state.daily.submitted && <section className="panel reminder-panel"><span className="reminder-dot" /><div><strong>任务会在下次登录时继续显示</strong><p>网站关闭时不会外部提醒，也不会自动累积新词。</p></div></section>}
+          {(!state.daily.submitted || state.daily.continuousLearning) && <section className="panel reminder-panel"><span className="reminder-dot" /><div><strong>任务会在下次登录时继续显示</strong><p>网站关闭时不会外部提醒，也不会自动累积新词。</p></div></section>}
         </aside>
       </div>
     </>

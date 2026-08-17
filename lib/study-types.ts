@@ -69,6 +69,7 @@ export type StudyState = {
   daily: {
     date: string;
     submitted: boolean;
+    continuousLearning: boolean;
     completed: {
       reviews: boolean;
       vocabularyLearn: boolean;
