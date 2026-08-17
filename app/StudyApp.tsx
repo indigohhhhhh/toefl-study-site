@@ -811,9 +811,114 @@ function WrongExplanation({ result }: { result: GradeResult }) {
 
 function WordLibrary({ items, learned }: { items: VocabularyItem[]; learned: number[] }) {
   const [query, setQuery] = useState("");
+  const [spellingId, setSpellingId] = useState<string | null>(null);
+  const [spellingAnswer, setSpellingAnswer] = useState("");
+  const [spellingResult, setSpellingResult] = useState<"correct" | "wrong" | null>(null);
+  const spellingInputRef = useRef<HTMLInputElement>(null);
   const filtered = items.filter((item) => `${item.word} ${item.meaningsZh}`.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 80);
+
+  useEffect(() => {
+    if (spellingId) spellingInputRef.current?.focus();
+  }, [spellingId]);
+
+  const resetSpelling = () => {
+    setSpellingId(null);
+    setSpellingAnswer("");
+    setSpellingResult(null);
+  };
+
+  const startSpelling = (itemId: string) => {
+    setSpellingId(itemId);
+    setSpellingAnswer("");
+    setSpellingResult(null);
+  };
+
+  const confirmSpelling = (item: VocabularyItem) => {
+    if (!spellingAnswer.trim() || spellingResult) return;
+    setSpellingResult(normalizedAnswer(spellingAnswer) === normalizedAnswer(item.word) ? "correct" : "wrong");
+  };
+
+  const moveToNextWord = (item: VocabularyItem) => {
+    const nextItem = filtered[filtered.findIndex((candidate) => candidate.id === item.id) + 1];
+    if (nextItem) startSpelling(nextItem.id);
+    else resetSpelling();
+  };
+
   return (
-    <section className="library-page"><div className="section-intro"><span className="pill">固定题库 · 800 词</span><h2>自由查看单词资料</h2><p>查看资料不会改变每日学习顺序；正式进度只在当日流程提交后更新。</p></div><input className="search-input" placeholder="搜索英文单词或中文释义" value={query} onChange={(event) => setQuery(event.target.value)} /><div className="library-grid">{filtered.map((item) => <details className="library-card" key={item.id}><summary><span className="library-index">{item.index}</span><div><strong>{item.word}</strong><small>{item.partOfSpeech} {item.meaningsZh}</small></div><i>{learned.includes(item.index) ? "已学" : "未学"}</i></summary><p>{item.pronunciation}</p><p><strong>英文释义：</strong>{item.definitionEn}</p><p className="example"><strong>例句：</strong>{item.example}</p></details>)}</div>{filtered.length === 80 && <p className="muted center">为保证手机流畅，搜索结果每次最多显示 80 条。</p>}</section>
+    <section className="library-page">
+      <div className="section-intro"><span className="pill">固定题库 · 800 词</span><h2>自由查看单词资料</h2><p>查看资料不会改变每日学习顺序；自由拼写也不会计入错题或正式进度。</p></div>
+      <input
+        className="search-input"
+        placeholder="搜索英文单词或中文释义"
+        value={query}
+        onChange={(event) => {
+          setQuery(event.target.value);
+          resetSpelling();
+        }}
+      />
+      <div className="library-grid">
+        {filtered.map((item) => {
+          const active = spellingId === item.id;
+          const itemPosition = filtered.findIndex((candidate) => candidate.id === item.id);
+          const hasNextItem = itemPosition >= 0 && itemPosition < filtered.length - 1;
+          return (
+            <article className={`library-card ${active ? "spelling-active" : ""}`} key={item.id}>
+              <div className="library-card-heading">
+                <span className="library-index">{item.index}</span>
+                <div className="library-card-main">
+                  {active ? (
+                    <input
+                      className="library-spelling-input"
+                      aria-label={`根据“${item.meaningsZh}”拼写英文单词`}
+                      autoComplete="off"
+                      disabled={Boolean(spellingResult)}
+                      placeholder="请输入英文拼写"
+                      ref={spellingInputRef}
+                      spellCheck={false}
+                      value={spellingAnswer}
+                      onChange={(event) => setSpellingAnswer(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") confirmSpelling(item);
+                      }}
+                    />
+                  ) : <strong>{item.word}</strong>}
+                  <small>{item.partOfSpeech} {item.meaningsZh}</small>
+                </div>
+                <div className="library-card-actions">
+                  <i>{learned.includes(item.index) ? "已学" : "未学"}</i>
+                  {!active && <button className="spelling-button" onClick={() => startSpelling(item.id)}>拼写</button>}
+                </div>
+              </div>
+              {active ? (
+                <div className="library-spelling-panel">
+                  {!spellingResult ? (
+                    <>
+                      <p>请根据中文释义拼写英文；本次练习不计入错题。</p>
+                      <button className="secondary-button" disabled={!spellingAnswer.trim()} onClick={() => confirmSpelling(item)}>确认</button>
+                    </>
+                  ) : (
+                    <>
+                      <p className={`spelling-feedback ${spellingResult}`} role="status">
+                        {spellingResult === "correct" ? "拼写正确" : "拼写错误"}，正确拼写：<strong>{item.word}</strong>
+                      </p>
+                      <button className="secondary-button" onClick={() => moveToNextWord(item)}>{hasNextItem ? "下一个单词" : "结束练习"}</button>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <details className="library-card-details">
+                  <summary>查看发音、英文释义和例句</summary>
+                  <p>{item.pronunciation}</p>
+                  <p><strong>英文释义：</strong>{item.definitionEn}</p>
+                  <p className="example"><strong>例句：</strong>{item.example}</p>
+                </details>
+              )}
+            </article>
+          );
+        })}
+      </div>
+      {filtered.length === 80 && <p className="muted center">为保证手机流畅，搜索结果每次最多显示 80 条。</p>}
+    </section>
   );
 }
 
