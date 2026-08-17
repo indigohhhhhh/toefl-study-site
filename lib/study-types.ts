@@ -61,6 +61,7 @@ export type StudyState = {
   progress: {
     vocabularyNextIndex: number;
     phraseNextIndex: number;
+    comprehensiveExerciseNextIndex: number;
     learnedVocabulary: number[];
     learnedPhrases: number[];
     reviews: ReviewItem[];
@@ -75,7 +76,6 @@ export type StudyState = {
       vocabularyCloze: boolean;
       phraseLearn: boolean;
       phraseSpelling: boolean;
-      phraseExercise: boolean;
     };
   };
 };

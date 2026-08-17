@@ -32,7 +32,8 @@ test("server-renders the real TOEFL learning dashboard", async () => {
   assert.match(html, /<title>词航 · 托福词汇学习<\/title>/);
   assert.match(html, /先复习 4 个到期错词\/错题/);
   assert.match(html, /学习第|学习新单词/);
-  assert.match(html, /词组配套练习/);
+  assert.match(html, /词组无提示拼写/);
+  assert.doesNotMatch(html, /词组配套练习/);
   assert.match(html, /manifest\.webmanifest/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
@@ -49,6 +50,16 @@ test("contains the complete fixed question banks", async () => {
   assert.deepEqual([vocabulary[0].word, vocabulary[15].word, vocabulary[799].word], ["evolve", "climatic", "popularity"]);
   assert.deepEqual([phrases[0].phrase, phrases[99].phrase], ["Adapt to", "Take into account"]);
   assert.ok(exercises.every((item) => Array.isArray(item.acceptedAnswers) && item.acceptedAnswers.length));
+  assert.deepEqual([exercises[0].prompt, exercises[0].answer], ["The survival of certain polar species depends heav  [3] on stable ice conditions.", "heavily"]);
+});
+
+test("decouples original Part 3 from the six-step daily phrase flow", async () => {
+  const source = await readFile(new URL("../app/StudyApp.tsx", import.meta.url), "utf8");
+  assert.match(source, /completion === "phraseSpelling"/);
+  assert.doesNotMatch(source, /completion === "phraseExercise"/);
+  assert.match(source, /learnedPhrases\.length >= phrases\.length/);
+  assert.match(source, /comprehensiveExerciseNextIndex/);
+  assert.match(source, /原资料 Part 3/);
 });
 
 test("strict normalizer ignores case, spacing, and trailing item numbers only", () => {
