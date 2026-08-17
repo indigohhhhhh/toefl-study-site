@@ -1,4 +1,4 @@
-const CACHE = "toefl-study-shell-v2";
+const CACHE = "toefl-study-shell-v5";
 const SHELL = ["/", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -32,12 +32,12 @@ self.addEventListener("fetch", (event) => {
   }
 
   event.respondWith(
-    caches.match(request).then((cached) => cached || fetch(request).then((response) => {
+    fetch(request).then((response) => {
       if (response.ok && url.origin === self.location.origin) {
         const copy = response.clone();
         caches.open(CACHE).then((cache) => cache.put(request, copy));
       }
       return response;
-    })),
+    }).catch(() => caches.match(request)),
   );
 });

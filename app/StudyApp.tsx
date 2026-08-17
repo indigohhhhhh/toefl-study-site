@@ -174,7 +174,19 @@ export default function StudyApp({
     const offlineHandler = () => setOnline(false);
     window.addEventListener("online", onlineHandler);
     window.addEventListener("offline", offlineHandler);
-    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    let controllerChanged = false;
+    const hadServiceWorkerController = Boolean(navigator.serviceWorker?.controller);
+    const controllerChangeHandler = () => {
+      if (!hadServiceWorkerController || controllerChanged) return;
+      controllerChanged = true;
+      window.location.reload();
+    };
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("controllerchange", controllerChangeHandler);
+      navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" })
+        .then((registration) => registration.update())
+        .catch(() => undefined);
+    }
     const installHandler = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as InstallPromptEvent);
@@ -186,6 +198,7 @@ export default function StudyApp({
       window.removeEventListener("online", onlineHandler);
       window.removeEventListener("offline", offlineHandler);
       window.removeEventListener("beforeinstallprompt", installHandler);
+      if ("serviceWorker" in navigator) navigator.serviceWorker.removeEventListener("controllerchange", controllerChangeHandler);
     };
   }, [initialState]);
 

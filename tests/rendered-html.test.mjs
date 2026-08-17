@@ -87,3 +87,14 @@ test("word spelling correction uses the same strict comparison", () => {
   assert.equal(normalizedAnswer(" Erosion 25 "), normalizedAnswer("erosion"));
   assert.notEqual(normalizedAnswer("errosion"), normalizedAnswer("erosion"));
 });
+
+test("service worker refreshes deployed assets before using its offline cache", async () => {
+  const [serviceWorker, source] = await Promise.all([
+    readFile(new URL("../public/sw.js", import.meta.url), "utf8"),
+    readFile(new URL("../app/StudyApp.tsx", import.meta.url), "utf8"),
+  ]);
+  assert.match(serviceWorker, /toefl-study-shell-v5/);
+  assert.match(serviceWorker, /fetch\(request\)[\s\S]*catch\(\(\) => caches\.match\(request\)\)/);
+  assert.match(source, /updateViaCache: "none"/);
+  assert.match(source, /controllerchange/);
+});
