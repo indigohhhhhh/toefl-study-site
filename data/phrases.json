@@ -1,0 +1,1002 @@
+[
+  {
+    "id": "phrase-001",
+    "index": 1,
+    "phrase": "Adapt to",
+    "meaningZh": "适应",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Adapt to"
+    ]
+  },
+  {
+    "id": "phrase-002",
+    "index": 2,
+    "phrase": "Attribute A to B",
+    "meaningZh": "将A归因于B",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Attribute A to B"
+    ]
+  },
+  {
+    "id": "phrase-003",
+    "index": 3,
+    "phrase": "Be essential to",
+    "meaningZh": "对...必不可少",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Be essential to"
+    ]
+  },
+  {
+    "id": "phrase-004",
+    "index": 4,
+    "phrase": "Be vital to",
+    "meaningZh": "对...至关重要",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Be vital to"
+    ]
+  },
+  {
+    "id": "phrase-005",
+    "index": 5,
+    "phrase": "Be relevant to",
+    "meaningZh": "与...相关",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Be relevant to"
+    ]
+  },
+  {
+    "id": "phrase-006",
+    "index": 6,
+    "phrase": "Contribute to",
+    "meaningZh": "导致,有助于",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Contribute to"
+    ]
+  },
+  {
+    "id": "phrase-007",
+    "index": 7,
+    "phrase": "Lead to",
+    "meaningZh": "导致",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Lead to"
+    ]
+  },
+  {
+    "id": "phrase-008",
+    "index": 8,
+    "phrase": "Object to",
+    "meaningZh": "反对",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Object to"
+    ]
+  },
+  {
+    "id": "phrase-009",
+    "index": 9,
+    "phrase": "Prior to",
+    "meaningZh": "在...之前",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Prior to"
+    ]
+  },
+  {
+    "id": "phrase-010",
+    "index": 10,
+    "phrase": "Refer to",
+    "meaningZh": "指的是,涉及",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Refer to"
+    ]
+  },
+  {
+    "id": "phrase-011",
+    "index": 11,
+    "phrase": "Respond to",
+    "meaningZh": "做出反应",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Respond to"
+    ]
+  },
+  {
+    "id": "phrase-012",
+    "index": 12,
+    "phrase": "Subscribe to",
+    "meaningZh": "订阅,同意(观点)",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Subscribe to"
+    ]
+  },
+  {
+    "id": "phrase-013",
+    "index": 13,
+    "phrase": "Be subject to",
+    "meaningZh": "受制于,易遭受",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Be subject to"
+    ]
+  },
+  {
+    "id": "phrase-014",
+    "index": 14,
+    "phrase": "Yield to",
+    "meaningZh": "屈服于",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Yield to"
+    ]
+  },
+  {
+    "id": "phrase-015",
+    "index": 15,
+    "phrase": "Be dedicated to",
+    "meaningZh": "致力于",
+    "category": "To 搭配",
+    "acceptedAnswers": [
+      "Be dedicated to"
+    ]
+  },
+  {
+    "id": "phrase-016",
+    "index": 16,
+    "phrase": "Associate with",
+    "meaningZh": "与...联系在一起",
+    "category": "With 搭配",
+    "acceptedAnswers": [
+      "Associate with"
+    ]
+  },
+  {
+    "id": "phrase-017",
+    "index": 17,
+    "phrase": "Collaborate with",
+    "meaningZh": "与...合作",
+    "category": "With 搭配",
+    "acceptedAnswers": [
+      "Collaborate with"
+    ]
+  },
+  {
+    "id": "phrase-018",
+    "index": 18,
+    "phrase": "Comply with",
+    "meaningZh": "遵守",
+    "category": "With 搭配",
+    "acceptedAnswers": [
+      "Comply with"
+    ]
+  },
+  {
+    "id": "phrase-019",
+    "index": 19,
+    "phrase": "Coincide with",
+    "meaningZh": "与...同时发生",
+    "category": "With 搭配",
+    "acceptedAnswers": [
+      "Coincide with"
+    ]
+  },
+  {
+    "id": "phrase-020",
+    "index": 20,
+    "phrase": "Conflict with",
+    "meaningZh": "与...冲突",
+    "category": "With 搭配",
+    "acceptedAnswers": [
+      "Conflict with"
+    ]
+  },
+  {
+    "id": "phrase-021",
+    "index": 21,
+    "phrase": "Cope with",
+    "meaningZh": "处理,应付",
+    "category": "With 搭配",
+    "acceptedAnswers": [
+      "Cope with"
+    ]
+  },
+  {
+    "id": "phrase-022",
+    "index": 22,
+    "phrase": "Interfere with",
+    "meaningZh": "干扰",
+    "category": "With 搭配",
+    "acceptedAnswers": [
+      "Interfere with"
+    ]
+  },
+  {
+    "id": "phrase-023",
+    "index": 23,
+    "phrase": "Be familiar with",
+    "meaningZh": "对...熟悉",
+    "category": "With 搭配",
+    "acceptedAnswers": [
+      "Be familiar with"
+    ]
+  },
+  {
+    "id": "phrase-024",
+    "index": 24,
+    "phrase": "Be consistent with",
+    "meaningZh": "与...一致",
+    "category": "With 搭配",
+    "acceptedAnswers": [
+      "Be consistent with"
+    ]
+  },
+  {
+    "id": "phrase-025",
+    "index": 25,
+    "phrase": "Equip with",
+    "meaningZh": "配备",
+    "category": "With 搭配",
+    "acceptedAnswers": [
+      "Equip with"
+    ]
+  },
+  {
+    "id": "phrase-026",
+    "index": 26,
+    "phrase": "Be aware of",
+    "meaningZh": "意识到",
+    "category": "Of 搭配",
+    "acceptedAnswers": [
+      "Be aware of"
+    ]
+  },
+  {
+    "id": "phrase-027",
+    "index": 27,
+    "phrase": "Be composed of",
+    "meaningZh": "由...组成",
+    "category": "Of 搭配",
+    "acceptedAnswers": [
+      "Be composed of"
+    ]
+  },
+  {
+    "id": "phrase-028",
+    "index": 28,
+    "phrase": "Be characteristic of",
+    "meaningZh": "是...的特征",
+    "category": "Of 搭配",
+    "acceptedAnswers": [
+      "Be characteristic of"
+    ]
+  },
+  {
+    "id": "phrase-029",
+    "index": 29,
+    "phrase": "Be independent of",
+    "meaningZh": "独立于",
+    "category": "Of 搭配",
+    "acceptedAnswers": [
+      "Be independent of"
+    ]
+  },
+  {
+    "id": "phrase-030",
+    "index": 30,
+    "phrase": "Consist of",
+    "meaningZh": "由...构成",
+    "category": "Of 搭配",
+    "acceptedAnswers": [
+      "Consist of"
+    ]
+  },
+  {
+    "id": "phrase-031",
+    "index": 31,
+    "phrase": "Deprive of",
+    "meaningZh": "剥夺",
+    "category": "Of 搭配",
+    "acceptedAnswers": [
+      "Deprive of"
+    ]
+  },
+  {
+    "id": "phrase-032",
+    "index": 32,
+    "phrase": "Remind of",
+    "meaningZh": "提醒,使想起",
+    "category": "Of 搭配",
+    "acceptedAnswers": [
+      "Remind of"
+    ]
+  },
+  {
+    "id": "phrase-033",
+    "index": 33,
+    "phrase": "Take advantage of",
+    "meaningZh": "利用",
+    "category": "Of 搭配",
+    "acceptedAnswers": [
+      "Take advantage of"
+    ]
+  },
+  {
+    "id": "phrase-034",
+    "index": 34,
+    "phrase": "The impact of",
+    "meaningZh": "...的影响",
+    "category": "Of 搭配",
+    "acceptedAnswers": [
+      "The impact of"
+    ]
+  },
+  {
+    "id": "phrase-035",
+    "index": 35,
+    "phrase": "The role of",
+    "meaningZh": "...的角色/作用",
+    "category": "Of 搭配",
+    "acceptedAnswers": [
+      "The role of"
+    ]
+  },
+  {
+    "id": "phrase-036",
+    "index": 36,
+    "phrase": "Benefit from",
+    "meaningZh": "从...中受益",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Benefit from"
+    ]
+  },
+  {
+    "id": "phrase-037",
+    "index": 37,
+    "phrase": "Derive from",
+    "meaningZh": "源自",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Derive from"
+    ]
+  },
+  {
+    "id": "phrase-038",
+    "index": 38,
+    "phrase": "Differ from",
+    "meaningZh": "与...不同",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Differ from"
+    ]
+  },
+  {
+    "id": "phrase-039",
+    "index": 39,
+    "phrase": "Result from",
+    "meaningZh": "起因于",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Result from"
+    ]
+  },
+  {
+    "id": "phrase-040",
+    "index": 40,
+    "phrase": "Stem from",
+    "meaningZh": "起源于",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Stem from"
+    ]
+  },
+  {
+    "id": "phrase-041",
+    "index": 41,
+    "phrase": "Be involved in",
+    "meaningZh": "参与,涉及",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Be involved in"
+    ]
+  },
+  {
+    "id": "phrase-042",
+    "index": 42,
+    "phrase": "Result in",
+    "meaningZh": "导致",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Result in"
+    ]
+  },
+  {
+    "id": "phrase-043",
+    "index": 43,
+    "phrase": "Succeed in",
+    "meaningZh": "在...方面成功",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Succeed in"
+    ]
+  },
+  {
+    "id": "phrase-044",
+    "index": 44,
+    "phrase": "Specialize in",
+    "meaningZh": "专攻",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Specialize in"
+    ]
+  },
+  {
+    "id": "phrase-045",
+    "index": 45,
+    "phrase": "Persist in",
+    "meaningZh": "坚持",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Persist in"
+    ]
+  },
+  {
+    "id": "phrase-046",
+    "index": 46,
+    "phrase": "Be based on",
+    "meaningZh": "基于",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Be based on"
+    ]
+  },
+  {
+    "id": "phrase-047",
+    "index": 47,
+    "phrase": "Concentrate on",
+    "meaningZh": "集中精力于",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Concentrate on"
+    ]
+  },
+  {
+    "id": "phrase-048",
+    "index": 48,
+    "phrase": "Depend on",
+    "meaningZh": "取决于",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Depend on"
+    ]
+  },
+  {
+    "id": "phrase-049",
+    "index": 49,
+    "phrase": "Impact on",
+    "meaningZh": "对...的影响",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Impact on"
+    ]
+  },
+  {
+    "id": "phrase-050",
+    "index": 50,
+    "phrase": "Rely on",
+    "meaningZh": "依靠",
+    "category": "From / In / On 搭配",
+    "acceptedAnswers": [
+      "Rely on"
+    ]
+  },
+  {
+    "id": "phrase-051",
+    "index": 51,
+    "phrase": "As a result",
+    "meaningZh": "结果是",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "As a result"
+    ]
+  },
+  {
+    "id": "phrase-052",
+    "index": 52,
+    "phrase": "As well as",
+    "meaningZh": "以及,也",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "As well as"
+    ]
+  },
+  {
+    "id": "phrase-053",
+    "index": 53,
+    "phrase": "In addition",
+    "meaningZh": "此外",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "In addition"
+    ]
+  },
+  {
+    "id": "phrase-054",
+    "index": 54,
+    "phrase": "In contrast",
+    "meaningZh": "相比之下",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "In contrast"
+    ]
+  },
+  {
+    "id": "phrase-055",
+    "index": 55,
+    "phrase": "In spite of",
+    "meaningZh": "尽管",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "In spite of"
+    ]
+  },
+  {
+    "id": "phrase-056",
+    "index": 56,
+    "phrase": "In terms of",
+    "meaningZh": "就...而言",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "In terms of"
+    ]
+  },
+  {
+    "id": "phrase-057",
+    "index": 57,
+    "phrase": "In response to",
+    "meaningZh": "为了应对",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "In response to"
+    ]
+  },
+  {
+    "id": "phrase-058",
+    "index": 58,
+    "phrase": "On the contrary",
+    "meaningZh": "正相反",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "On the contrary"
+    ]
+  },
+  {
+    "id": "phrase-059",
+    "index": 59,
+    "phrase": "On the other hand",
+    "meaningZh": "另一方面",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "On the other hand"
+    ]
+  },
+  {
+    "id": "phrase-060",
+    "index": 60,
+    "phrase": "Regardless of",
+    "meaningZh": "不管",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "Regardless of"
+    ]
+  },
+  {
+    "id": "phrase-061",
+    "index": 61,
+    "phrase": "Thanks to",
+    "meaningZh": "由于",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "Thanks to"
+    ]
+  },
+  {
+    "id": "phrase-062",
+    "index": 62,
+    "phrase": "According to",
+    "meaningZh": "根据",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "According to"
+    ]
+  },
+  {
+    "id": "phrase-063",
+    "index": 63,
+    "phrase": "Due to",
+    "meaningZh": "由于",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "Due to"
+    ]
+  },
+  {
+    "id": "phrase-064",
+    "index": 64,
+    "phrase": "Instead of",
+    "meaningZh": "而不是",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "Instead of"
+    ]
+  },
+  {
+    "id": "phrase-065",
+    "index": 65,
+    "phrase": "Such as",
+    "meaningZh": "例如",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "Such as"
+    ]
+  },
+  {
+    "id": "phrase-066",
+    "index": 66,
+    "phrase": "For instance",
+    "meaningZh": "例如",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "For instance"
+    ]
+  },
+  {
+    "id": "phrase-067",
+    "index": 67,
+    "phrase": "By contrast",
+    "meaningZh": "相比之下",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "By contrast"
+    ]
+  },
+  {
+    "id": "phrase-068",
+    "index": 68,
+    "phrase": "Even if",
+    "meaningZh": "即使",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "Even if"
+    ]
+  },
+  {
+    "id": "phrase-069",
+    "index": 69,
+    "phrase": "Even though",
+    "meaningZh": "尽管",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "Even though"
+    ]
+  },
+  {
+    "id": "phrase-070",
+    "index": 70,
+    "phrase": "In order to",
+    "meaningZh": "为了",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "In order to"
+    ]
+  },
+  {
+    "id": "phrase-071",
+    "index": 71,
+    "phrase": "So as to",
+    "meaningZh": "为了",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "So as to"
+    ]
+  },
+  {
+    "id": "phrase-072",
+    "index": 72,
+    "phrase": "With respect to",
+    "meaningZh": "关于",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "With respect to"
+    ]
+  },
+  {
+    "id": "phrase-073",
+    "index": 73,
+    "phrase": "In particular",
+    "meaningZh": "尤其",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "In particular"
+    ]
+  },
+  {
+    "id": "phrase-074",
+    "index": 74,
+    "phrase": "In essence",
+    "meaningZh": "本质上",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "In essence"
+    ]
+  },
+  {
+    "id": "phrase-075",
+    "index": 75,
+    "phrase": "As far as ... is concerned",
+    "meaningZh": "就...而言",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "As far as ... is concerned"
+    ]
+  },
+  {
+    "id": "phrase-076",
+    "index": 76,
+    "phrase": "In the long run",
+    "meaningZh": "从长远来看",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "In the long run"
+    ]
+  },
+  {
+    "id": "phrase-077",
+    "index": 77,
+    "phrase": "By means of",
+    "meaningZh": "通过...手段",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "By means of"
+    ]
+  },
+  {
+    "id": "phrase-078",
+    "index": 78,
+    "phrase": "For the sake of",
+    "meaningZh": "为了...起见",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "For the sake of"
+    ]
+  },
+  {
+    "id": "phrase-079",
+    "index": 79,
+    "phrase": "Provided that",
+    "meaningZh": "只要",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "Provided that"
+    ]
+  },
+  {
+    "id": "phrase-080",
+    "index": 80,
+    "phrase": "Not only... but also...",
+    "meaningZh": "不仅...而且...",
+    "category": "结构与逻辑连接",
+    "acceptedAnswers": [
+      "Not only... but also..."
+    ]
+  },
+  {
+    "id": "phrase-081",
+    "index": 81,
+    "phrase": "Make a decision",
+    "meaningZh": "做出决定",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "Make a decision"
+    ]
+  },
+  {
+    "id": "phrase-082",
+    "index": 82,
+    "phrase": "Meet the needs",
+    "meaningZh": "满足需求",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "Meet the needs"
+    ]
+  },
+  {
+    "id": "phrase-083",
+    "index": 83,
+    "phrase": "Take measures",
+    "meaningZh": "采取措施",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "Take measures"
+    ]
+  },
+  {
+    "id": "phrase-084",
+    "index": 84,
+    "phrase": "Pave the way for",
+    "meaningZh": "为...铺平道路",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "Pave the way for"
+    ]
+  },
+  {
+    "id": "phrase-085",
+    "index": 85,
+    "phrase": "Play a role in",
+    "meaningZh": "在...中起作用",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "Play a role in"
+    ]
+  },
+  {
+    "id": "phrase-086",
+    "index": 86,
+    "phrase": "At one's own pace",
+    "meaningZh": "按自己的节奏",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "At one's own pace"
+    ]
+  },
+  {
+    "id": "phrase-087",
+    "index": 87,
+    "phrase": "Over time",
+    "meaningZh": "随着时间推移",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "Over time"
+    ]
+  },
+  {
+    "id": "phrase-088",
+    "index": 88,
+    "phrase": "For example",
+    "meaningZh": "例如",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "For example"
+    ]
+  },
+  {
+    "id": "phrase-089",
+    "index": 89,
+    "phrase": "High/Low density",
+    "meaningZh": "高/低密度",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "High/Low density"
+    ]
+  },
+  {
+    "id": "phrase-090",
+    "index": 90,
+    "phrase": "A wide range of",
+    "meaningZh": "大范围的",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "A wide range of"
+    ]
+  },
+  {
+    "id": "phrase-091",
+    "index": 91,
+    "phrase": "On a large scale",
+    "meaningZh": "大规模地",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "On a large scale"
+    ]
+  },
+  {
+    "id": "phrase-092",
+    "index": 92,
+    "phrase": "Be linked to",
+    "meaningZh": "与...连接",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "Be linked to"
+    ]
+  },
+  {
+    "id": "phrase-093",
+    "index": 93,
+    "phrase": "Bear in mind",
+    "meaningZh": "记住",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "Bear in mind"
+    ]
+  },
+  {
+    "id": "phrase-094",
+    "index": 94,
+    "phrase": "By and large",
+    "meaningZh": "总的来说",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "By and large"
+    ]
+  },
+  {
+    "id": "phrase-095",
+    "index": 95,
+    "phrase": "In other words",
+    "meaningZh": "换句话说",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "In other words"
+    ]
+  },
+  {
+    "id": "phrase-096",
+    "index": 96,
+    "phrase": "To some extent",
+    "meaningZh": "在某种程度上",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "To some extent"
+    ]
+  },
+  {
+    "id": "phrase-097",
+    "index": 97,
+    "phrase": "Point of view",
+    "meaningZh": "观点",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "Point of view"
+    ]
+  },
+  {
+    "id": "phrase-098",
+    "index": 98,
+    "phrase": "Be notable for",
+    "meaningZh": "因...而著名",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "Be notable for"
+    ]
+  },
+  {
+    "id": "phrase-099",
+    "index": 99,
+    "phrase": "Be responsible for",
+    "meaningZh": "为...负责",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "Be responsible for"
+    ]
+  },
+  {
+    "id": "phrase-100",
+    "index": 100,
+    "phrase": "Take into account",
+    "meaningZh": "考虑到",
+    "category": "学术表达",
+    "acceptedAnswers": [
+      "Take into account"
+    ]
+  }
+]

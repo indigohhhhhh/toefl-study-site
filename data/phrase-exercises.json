@@ -1,0 +1,1349 @@
+[
+  {
+    "id": "exercise-001",
+    "index": 1,
+    "sourceSentence": "The survival of certain polar species depends heav_ _ _ on stable ice conditions.",
+    "prompt": "The survival of certain polar species depends heav  [3] on stable ice conditions.",
+    "answer": "heavily",
+    "acceptedAnswers": [
+      "heavily"
+    ],
+    "sourceAnswer": "heavily",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-002",
+    "index": 2,
+    "sourceSentence": "New evidence suggests that the extinction resul_ _ _ from a sudden cosmic event.",
+    "prompt": "New evidence suggests that the extinction resul  [3] from a sudden cosmic event.",
+    "answer": "resulted",
+    "acceptedAnswers": [
+      "resulted"
+    ],
+    "sourceAnswer": "resulted",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-003",
+    "index": 3,
+    "sourceSentence": "The mycelium consi_ _ _ of a vast underground network of fungal threads.",
+    "prompt": "The mycelium consi  [3] of a vast underground network of fungal threads.",
+    "answer": "consists",
+    "acceptedAnswers": [
+      "consists"
+    ],
+    "sourceAnswer": "consists",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-004",
+    "index": 4,
+    "sourceSentence": "Many researchers assoc_ _ _ _ with this university are studying renewable energy.",
+    "prompt": "Many researchers assoc  [4] with this university are studying renewable energy.",
+    "answer": "associated",
+    "acceptedAnswers": [
+      "associated"
+    ],
+    "sourceAnswer": "associated",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-005",
+    "index": 5,
+    "sourceSentence": "Volcanic eruptions contri_ _ _ _ to the cooling of the Earth's atmosphere.",
+    "prompt": "Volcanic eruptions contri  [4] to the cooling of the Earth's atmosphere.",
+    "answer": "contribute",
+    "acceptedAnswers": [
+      "contribute"
+    ],
+    "sourceAnswer": "contribute",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-006",
+    "index": 6,
+    "sourceSentence": "Local tribes have successfully ada_ _ _ _ to the harsh environment of the Andes.",
+    "prompt": "Local tribes have successfully ada  [4] to the harsh environment of the Andes.",
+    "answer": "adapted",
+    "acceptedAnswers": [
+      "adapted"
+    ],
+    "sourceAnswer": "adapted",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-007",
+    "index": 7,
+    "sourceSentence": "The theory of continental drift is ba_ _ _ on the shape of the continents.",
+    "prompt": "The theory of continental drift is ba  [3] on the shape of the continents.",
+    "answer": "based",
+    "acceptedAnswers": [
+      "based"
+    ],
+    "sourceAnswer": "based",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-008",
+    "index": 8,
+    "sourceSentence": "These technological advances pa_ _ the w_ _ for more ambitious space missions.",
+    "prompt": "These technological advances pa  [2] the w  [2] for more ambitious space missions.",
+    "answer": "paved the way",
+    "acceptedAnswers": [
+      "paved the way"
+    ],
+    "sourceAnswer": "paved the way",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-009",
+    "index": 9,
+    "sourceSentence": "Urbanization often lea_ _ to a significant reduction in local biodiversity.",
+    "prompt": "Urbanization often lea  [2] to a significant reduction in local biodiversity.",
+    "answer": "leads",
+    "acceptedAnswers": [
+      "leads"
+    ],
+    "sourceAnswer": "leads",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-010",
+    "index": 10,
+    "sourceSentence": "Some mammals re_ _ on their sense of smell to navigate in the dark.",
+    "prompt": "Some mammals re  [2] on their sense of smell to navigate in the dark.",
+    "answer": "rely",
+    "acceptedAnswers": [
+      "rely"
+    ],
+    "sourceAnswer": "rely",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-011",
+    "index": 11,
+    "sourceSentence": "The distinct geological features were car_ _ _ out by moving glaciers.",
+    "prompt": "The distinct geological features were car  [3] out by moving glaciers.",
+    "answer": "carved",
+    "acceptedAnswers": [
+      "carved"
+    ],
+    "sourceAnswer": "carved",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-012",
+    "index": 12,
+    "sourceSentence": "Increased carbon dioxide levels are respo_ _ _ _ _ _ for the greenhouse effect.",
+    "prompt": "Increased carbon dioxide levels are respo  [6] for the greenhouse effect.",
+    "answer": "responsible",
+    "acceptedAnswers": [
+      "responsible"
+    ],
+    "sourceAnswer": "responsible",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-013",
+    "index": 13,
+    "sourceSentence": "The new law was designed to comp_ _ with international safety standards.",
+    "prompt": "The new law was designed to comp  [2] with international safety standards.",
+    "answer": "comply",
+    "acceptedAnswers": [
+      "comply"
+    ],
+    "sourceAnswer": "comply",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-014",
+    "index": 14,
+    "sourceSentence": "Ancient sailors rel_ _ _ on the stars to navigate across the open ocean.",
+    "prompt": "Ancient sailors rel  [3] on the stars to navigate across the open ocean.",
+    "answer": "relied",
+    "acceptedAnswers": [
+      "relied"
+    ],
+    "sourceAnswer": "relied",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-015",
+    "index": 15,
+    "sourceSentence": "This specific enzyme is vit_ _ to the process of sugar fermentation.",
+    "prompt": "This specific enzyme is vit  [2] to the process of sugar fermentation.",
+    "answer": "vital",
+    "acceptedAnswers": [
+      "vital"
+    ],
+    "sourceAnswer": "vital",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-016",
+    "index": 16,
+    "sourceSentence": "The archeologist's findings refe_ _ed to a civilization previously unknown.",
+    "prompt": "The archeologist's findings refe  [2] ed to a civilization previously unknown.",
+    "answer": "referred",
+    "acceptedAnswers": [
+      "referred"
+    ],
+    "sourceAnswer": "referred",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-017",
+    "index": 17,
+    "sourceSentence": "Scientists persi_ _ in their efforts to map the entire seafloor.",
+    "prompt": "Scientists persi  [2] in their efforts to map the entire seafloor.",
+    "answer": "persist",
+    "acceptedAnswers": [
+      "persist"
+    ],
+    "sourceAnswer": "persist",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-018",
+    "index": 18,
+    "sourceSentence": "The coloring of the butterfly diff_ _ _ from that of its moth relatives.",
+    "prompt": "The coloring of the butterfly diff  [3] from that of its moth relatives.",
+    "answer": "differs",
+    "acceptedAnswers": [
+      "differs"
+    ],
+    "sourceAnswer": "differs",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-019",
+    "index": 19,
+    "sourceSentence": "Marine biologists speci_ _ _ _ _ in the behavior of deep-sea creatures.",
+    "prompt": "Marine biologists speci  [5] in the behavior of deep-sea creatures.",
+    "answer": "specialize",
+    "acceptedAnswers": [
+      "specialize"
+    ],
+    "sourceAnswer": "specialize",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-020",
+    "index": 20,
+    "sourceSentence": "The success of the crop depen_ _ on the seasonal rainfall patterns.",
+    "prompt": "The success of the crop depen  [2] on the seasonal rainfall patterns.",
+    "answer": "depends",
+    "acceptedAnswers": [
+      "depends"
+    ],
+    "sourceAnswer": "depends",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-021",
+    "index": 21,
+    "sourceSentence": "New educational tools provi_ _ a sp_ _ _ for students to collaborate online.",
+    "prompt": "New educational tools provi  [2] a sp  [3] for students to collaborate online.",
+    "answer": "provide a space",
+    "acceptedAnswers": [
+      "provide a space"
+    ],
+    "sourceAnswer": "provide a space",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-022",
+    "index": 22,
+    "sourceSentence": "The patient's body failed to respo_ _ to the traditional medical treatment.",
+    "prompt": "The patient's body failed to respo  [2] to the traditional medical treatment.",
+    "answer": "respond",
+    "acceptedAnswers": [
+      "respond"
+    ],
+    "sourceAnswer": "respond",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-023",
+    "index": 23,
+    "sourceSentence": "The migration of birds often coinci_ _ _ with changes in day length.",
+    "prompt": "The migration of birds often coinci  [3] with changes in day length.",
+    "answer": "coincides",
+    "acceptedAnswers": [
+      "coincides"
+    ],
+    "sourceAnswer": "coincides",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-024",
+    "index": 24,
+    "sourceSentence": "These chemical reactions relea_ _ oxy_ _ _ into the surrounding atmosphere.",
+    "prompt": "These chemical reactions relea  [2] oxy  [3] into the surrounding atmosphere.",
+    "answer": "release oxygen",
+    "acceptedAnswers": [
+      "release oxygen"
+    ],
+    "sourceAnswer": "release oxygen",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-025",
+    "index": 25,
+    "sourceSentence": "Predators must def_ _ _ against intruders to protect their territory.",
+    "prompt": "Predators must def  [3] against intruders to protect their territory.",
+    "answer": "defend",
+    "acceptedAnswers": [
+      "defend"
+    ],
+    "sourceAnswer": "defend",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-026",
+    "index": 26,
+    "sourceSentence": "The museum's collection is compo_ _ _ of artifacts from the Bronze Age.",
+    "prompt": "The museum's collection is compo  [3] of artifacts from the Bronze Age.",
+    "answer": "composed",
+    "acceptedAnswers": [
+      "composed"
+    ],
+    "sourceAnswer": "composed",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-027",
+    "index": 27,
+    "sourceSentence": "Modern biochemistry emer_ _ _ from early studies of natural processes.",
+    "prompt": "Modern biochemistry emer  [3] from early studies of natural processes.",
+    "answer": "emerged",
+    "acceptedAnswers": [
+      "emerged"
+    ],
+    "sourceAnswer": "emerged",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-028",
+    "index": 28,
+    "sourceSentence": "Some species are criti_ _ _ _ endan_ _ _ _ _ due to illegal poaching.",
+    "prompt": "Some species are criti  [4] endan  [5] due to illegal poaching.",
+    "answer": "critically endangered",
+    "acceptedAnswers": [
+      "critically endangered"
+    ],
+    "sourceAnswer": "critically endangered",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-029",
+    "index": 29,
+    "sourceSentence": "The researchers succee_ _ _ in isolating the gene responsible for the trait.",
+    "prompt": "The researchers succee  [3] in isolating the gene responsible for the trait.",
+    "answer": "succeeded",
+    "acceptedAnswers": [
+      "succeeded"
+    ],
+    "sourceAnswer": "succeeded",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-030",
+    "index": 30,
+    "sourceSentence": "High-speed internet is essen_ _ _ _ to modern economic development.",
+    "prompt": "High-speed internet is essen  [4] to modern economic development.",
+    "answer": "essential",
+    "acceptedAnswers": [
+      "essential"
+    ],
+    "sourceAnswer": "essential",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-031",
+    "index": 31,
+    "sourceSentence": "The project aims to mitig_ _ _ the imp_ _ _ of the recent oil spill.",
+    "prompt": "The project aims to mitig  [3] the imp  [3] of the recent oil spill.",
+    "answer": "mitigate the impact",
+    "acceptedAnswers": [
+      "mitigate the impact"
+    ],
+    "sourceAnswer": "mitigate the impact",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-032",
+    "index": 32,
+    "sourceSentence": "Many modern traditions ste_ from ancient religious ceremonies.",
+    "prompt": "Many modern traditions ste  [1] from ancient religious ceremonies.",
+    "answer": "stem",
+    "acceptedAnswers": [
+      "stem"
+    ],
+    "sourceAnswer": "stem",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-033",
+    "index": 33,
+    "sourceSentence": "The artist is kno_ _ for his unique use of vibrant colors and light.",
+    "prompt": "The artist is kno  [2] for his unique use of vibrant colors and light.",
+    "answer": "known",
+    "acceptedAnswers": [
+      "known"
+    ],
+    "sourceAnswer": "known",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-034",
+    "index": 34,
+    "sourceSentence": "This chemical compound is capab_ _ of absorbing large amounts of heat.",
+    "prompt": "This chemical compound is capab  [2] of absorbing large amounts of heat.",
+    "answer": "capable",
+    "acceptedAnswers": [
+      "capable"
+    ],
+    "sourceAnswer": "capable",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-035",
+    "index": 35,
+    "sourceSentence": "The movement of tectonic plates is funda_ _ _ _ _ _ in understanding earthquakes.",
+    "prompt": "The movement of tectonic plates is funda  [6] in understanding earthquakes.",
+    "answer": "fundamental",
+    "acceptedAnswers": [
+      "fundamental"
+    ],
+    "sourceAnswer": "fundamental",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-036",
+    "index": 36,
+    "sourceSentence": "Many bird species eng_ _ _ in long-distance migration every winter.",
+    "prompt": "Many bird species eng  [3] in long-distance migration every winter.",
+    "answer": "engage",
+    "acceptedAnswers": [
+      "engage"
+    ],
+    "sourceAnswer": "engage",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-037",
+    "index": 37,
+    "sourceSentence": "The discovery shed ligh_ on the social structure of early humans.",
+    "prompt": "The discovery shed ligh  [1] on the social structure of early humans.",
+    "answer": "shed light on",
+    "acceptedAnswers": [
+      "shed light on",
+      "light"
+    ],
+    "sourceAnswer": "light(shed light on)",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-038",
+    "index": 38,
+    "sourceSentence": "Children devel_ _ at their o_ _ pa_ _ when learning a second language.",
+    "prompt": "Children devel  [2] at their o  [2] pa  [2] when learning a second language.",
+    "answer": "develop at their own pace",
+    "acceptedAnswers": [
+      "develop at their own pace"
+    ],
+    "sourceAnswer": "develop at their own pace",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-039",
+    "index": 39,
+    "sourceSentence": "The structure of the building is simil_ _ to those found in ancient Rome.",
+    "prompt": "The structure of the building is simil  [2] to those found in ancient Rome.",
+    "answer": "similar",
+    "acceptedAnswers": [
+      "similar"
+    ],
+    "sourceAnswer": "similar",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-040",
+    "index": 40,
+    "sourceSentence": "Philosophers often fo_ _ _ on the nature of subjective experience.",
+    "prompt": "Philosophers often fo  [3] on the nature of subjective experience.",
+    "answer": "focus",
+    "acceptedAnswers": [
+      "focus"
+    ],
+    "sourceAnswer": "focus",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-041",
+    "index": 41,
+    "sourceSentence": "The team collab_ _ _ _ _ with international experts to solve the crisis.",
+    "prompt": "The team collab  [5] with international experts to solve the crisis.",
+    "answer": "collaborated",
+    "acceptedAnswers": [
+      "collaborated"
+    ],
+    "sourceAnswer": "collaborated",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-042",
+    "index": 42,
+    "sourceSentence": "The sudden noise interf_ _ _ _ with the animal's hunting patterns.",
+    "prompt": "The sudden noise interf  [4] with the animal's hunting patterns.",
+    "answer": "interfered",
+    "acceptedAnswers": [
+      "interfered"
+    ],
+    "sourceAnswer": "interfered",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-043",
+    "index": 43,
+    "sourceSentence": "Desert plants have waxy coati_ _ _ to prevent excessive water loss.",
+    "prompt": "Desert plants have waxy coati  [3] to prevent excessive water loss.",
+    "answer": "coating",
+    "acceptedAnswers": [
+      "coating"
+    ],
+    "sourceAnswer": "coating",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-044",
+    "index": 44,
+    "sourceSentence": "The island is notab_ _ for its unique and diverse lizard population.",
+    "prompt": "The island is notab  [2] for its unique and diverse lizard population.",
+    "answer": "notable",
+    "acceptedAnswers": [
+      "notable"
+    ],
+    "sourceAnswer": "notable",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-045",
+    "index": 45,
+    "sourceSentence": "Educators strive to fost_ _ a sense of community among their students.",
+    "prompt": "Educators strive to fost  [2] a sense of community among their students.",
+    "answer": "foster",
+    "acceptedAnswers": [
+      "foster"
+    ],
+    "sourceAnswer": "foster",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-046",
+    "index": 46,
+    "sourceSentence": "The data is consis_ _ _ _ with the results of previous experiments.",
+    "prompt": "The data is consis  [4] with the results of previous experiments.",
+    "answer": "consistent",
+    "acceptedAnswers": [
+      "consistent"
+    ],
+    "sourceAnswer": "consistent",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-047",
+    "index": 47,
+    "sourceSentence": "Scientists analy_ _ the mov_ _ _ _ _ _ of glaciers to predict sea-level rise.",
+    "prompt": "Scientists analy  [2] the mov  [6] of glaciers to predict sea-level rise.",
+    "answer": "analyze the movement",
+    "acceptedAnswers": [
+      "analyze the movement"
+    ],
+    "sourceAnswer": "analyze the movement",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-048",
+    "index": 48,
+    "sourceSentence": "New innovations reach glob_ _ audien_ _ _ within a matter of days.",
+    "prompt": "New innovations reach glob  [2] audien  [3] within a matter of days.",
+    "answer": "global audiences",
+    "acceptedAnswers": [
+      "global audiences"
+    ],
+    "sourceAnswer": "global audiences",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-049",
+    "index": 49,
+    "sourceSentence": "The forest is charact_ _ _ _ _ _ _ of the region's subtropical climate.",
+    "prompt": "The forest is charact  [7] of the region's subtropical climate.",
+    "answer": "characteristic",
+    "acceptedAnswers": [
+      "characteristic"
+    ],
+    "sourceAnswer": "characteristic",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-050",
+    "index": 50,
+    "sourceSentence": "Many people take advant_ _ _ of virtual tours to explore museums.",
+    "prompt": "Many people take advant  [3] of virtual tours to explore museums.",
+    "answer": "advantage",
+    "acceptedAnswers": [
+      "advantage"
+    ],
+    "sourceAnswer": "advantage",
+    "explanation": "",
+    "section": "介词搭配"
+  },
+  {
+    "id": "exercise-051",
+    "index": 51,
+    "sourceSentence": "As a resu_ _, the coastal town had to be evacuated during the flood.",
+    "prompt": "As a resu  [2], the coastal town had to be evacuated during the flood.",
+    "answer": "as a result",
+    "acceptedAnswers": [
+      "as a result",
+      "result"
+    ],
+    "sourceAnswer": "result(as a result)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-052",
+    "index": 52,
+    "sourceSentence": "The study covers biology as we_ _ as environmental chemistry.",
+    "prompt": "The study covers biology as we  [2] as environmental chemistry.",
+    "answer": "as well as",
+    "acceptedAnswers": [
+      "as well as",
+      "well"
+    ],
+    "sourceAnswer": "well(as well as)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-053",
+    "index": 53,
+    "sourceSentence": "In addi_ _ _ _, the new engine is much more fuel-efficient.",
+    "prompt": "In addi  [4], the new engine is much more fuel-efficient.",
+    "answer": "in addition",
+    "acceptedAnswers": [
+      "in addition",
+      "addition"
+    ],
+    "sourceAnswer": "addition(in addition)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-054",
+    "index": 54,
+    "sourceSentence": "In contr_ _ _, the northern hemisphere is experiencing a mild winter.",
+    "prompt": "In contr  [3], the northern hemisphere is experiencing a mild winter.",
+    "answer": "in contrast",
+    "acceptedAnswers": [
+      "in contrast",
+      "contrast"
+    ],
+    "sourceAnswer": "contrast(in contrast)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-055",
+    "index": 55,
+    "sourceSentence": "In spi_ _ of the heavy rain, the archeological dig continued.",
+    "prompt": "In spi  [2] of the heavy rain, the archeological dig continued.",
+    "answer": "in spite of",
+    "acceptedAnswers": [
+      "in spite of",
+      "spite"
+    ],
+    "sourceAnswer": "spite(in spite of)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-056",
+    "index": 56,
+    "sourceSentence": "In ter_ _ of intelligence, dolphins are among the top tier of mammals.",
+    "prompt": "In ter  [2] of intelligence, dolphins are among the top tier of mammals.",
+    "answer": "in terms of",
+    "acceptedAnswers": [
+      "in terms of",
+      "terms"
+    ],
+    "sourceAnswer": "terms(in terms of)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-057",
+    "index": 57,
+    "sourceSentence": "In respo_ _ _ to public demand, the company lowered its prices.",
+    "prompt": "In respo  [3] to public demand, the company lowered its prices.",
+    "answer": "in response to",
+    "acceptedAnswers": [
+      "in response to",
+      "response"
+    ],
+    "sourceAnswer": "response(in response to)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-058",
+    "index": 58,
+    "sourceSentence": "On the contr_ _ _, the experiment showed that the drug was effective.",
+    "prompt": "On the contr  [3], the experiment showed that the drug was effective.",
+    "answer": "on the contrary",
+    "acceptedAnswers": [
+      "on the contrary",
+      "contrary"
+    ],
+    "sourceAnswer": "contrary(on the contrary)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-059",
+    "index": 59,
+    "sourceSentence": "On the oth_ _ hand, solar energy can be expensive to install initially.",
+    "prompt": "On the oth  [2] hand, solar energy can be expensive to install initially.",
+    "answer": "on the other hand",
+    "acceptedAnswers": [
+      "on the other hand",
+      "other"
+    ],
+    "sourceAnswer": "other(on the other hand)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-060",
+    "index": 60,
+    "sourceSentence": "Regar_ _ _ _ _ of the weather, the research team goes out daily.",
+    "prompt": "Regar  [5] of the weather, the research team goes out daily.",
+    "answer": "regardless of",
+    "acceptedAnswers": [
+      "regardless of",
+      "regardless"
+    ],
+    "sourceAnswer": "regardless(regardless of)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-061",
+    "index": 61,
+    "sourceSentence": "Than_ _ to satellite imagery, we can now track deforestation easily.",
+    "prompt": "Than  [2] to satellite imagery, we can now track deforestation easily.",
+    "answer": "thanks to",
+    "acceptedAnswers": [
+      "thanks to",
+      "thanks"
+    ],
+    "sourceAnswer": "thanks(thanks to)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-062",
+    "index": 62,
+    "sourceSentence": "Accor_ _ _ _ to the recent report, the ice caps are melting faster.",
+    "prompt": "Accor  [4] to the recent report, the ice caps are melting faster.",
+    "answer": "according to",
+    "acceptedAnswers": [
+      "according to",
+      "according"
+    ],
+    "sourceAnswer": "according(according to)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-063",
+    "index": 63,
+    "sourceSentence": "D_ _ to a lack of funding, the project was temporarily suspended.",
+    "prompt": "D  [2] to a lack of funding, the project was temporarily suspended.",
+    "answer": "due to",
+    "acceptedAnswers": [
+      "due to"
+    ],
+    "sourceAnswer": "due to",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-064",
+    "index": 64,
+    "sourceSentence": "Inst_ _ _ of using coal, the factory switched to natural gas.",
+    "prompt": "Inst  [3] of using coal, the factory switched to natural gas.",
+    "answer": "instead of",
+    "acceptedAnswers": [
+      "instead of",
+      "instead"
+    ],
+    "sourceAnswer": "instead(instead of)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-065",
+    "index": 65,
+    "sourceSentence": "Large carnivores, su_ _ as lions and tigers, require vast territories.",
+    "prompt": "Large carnivores, su  [2] as lions and tigers, require vast territories.",
+    "answer": "such as",
+    "acceptedAnswers": [
+      "such as"
+    ],
+    "sourceAnswer": "such as",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-066",
+    "index": 66,
+    "sourceSentence": "For inst_ _ _ _, the invention of the wheel changed human transport.",
+    "prompt": "For inst  [4], the invention of the wheel changed human transport.",
+    "answer": "for instance",
+    "acceptedAnswers": [
+      "for instance",
+      "instance"
+    ],
+    "sourceAnswer": "instance(for instance)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-067",
+    "index": 67,
+    "sourceSentence": "By contr_ _ _, the second group of participants showed no change.",
+    "prompt": "By contr  [3], the second group of participants showed no change.",
+    "answer": "by contrast",
+    "acceptedAnswers": [
+      "by contrast",
+      "contrast"
+    ],
+    "sourceAnswer": "contrast(by contrast)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-068",
+    "index": 68,
+    "sourceSentence": "Ev_ _ if the temperature rises slightly, the permafrost may melt.",
+    "prompt": "Ev  [2] if the temperature rises slightly, the permafrost may melt.",
+    "answer": "even if",
+    "acceptedAnswers": [
+      "even if"
+    ],
+    "sourceAnswer": "even if",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-069",
+    "index": 69,
+    "sourceSentence": "Even thou_ _ the ruins are old, they remain remarkably intact.",
+    "prompt": "Even thou  [2] the ruins are old, they remain remarkably intact.",
+    "answer": "even though",
+    "acceptedAnswers": [
+      "even though",
+      "though"
+    ],
+    "sourceAnswer": "though(even though)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-070",
+    "index": 70,
+    "sourceSentence": "In ord_ _ to protect the forest, the government created a national park.",
+    "prompt": "In ord  [2] to protect the forest, the government created a national park.",
+    "answer": "in order to",
+    "acceptedAnswers": [
+      "in order to",
+      "order"
+    ],
+    "sourceAnswer": "order(in order to)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-071",
+    "index": 71,
+    "sourceSentence": "S_ as to reduce costs, the airline stopped offering free meals.",
+    "prompt": "S  [1] as to reduce costs, the airline stopped offering free meals.",
+    "answer": "so as to",
+    "acceptedAnswers": [
+      "so as to"
+    ],
+    "sourceAnswer": "so as to",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-072",
+    "index": 72,
+    "sourceSentence": "With respe_ _ to the environment, the new policy is very ambitious.",
+    "prompt": "With respe  [2] to the environment, the new policy is very ambitious.",
+    "answer": "with respect to",
+    "acceptedAnswers": [
+      "with respect to",
+      "respect"
+    ],
+    "sourceAnswer": "respect(with respect to) with respect to关于...... 就......而言 涉及......在......方面 ≈ regarding / concerning / about(但更正式)",
+    "explanation": "with respect to关于...... 就......而言 涉及......在......方面 ≈ regarding / concerning / about(但更正式)",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-073",
+    "index": 73,
+    "sourceSentence": "In partic_ _ _ _, the study focused on children under the age of five.",
+    "prompt": "In partic  [4], the study focused on children under the age of five.",
+    "answer": "in particular",
+    "acceptedAnswers": [
+      "in particular",
+      "particular"
+    ],
+    "sourceAnswer": "particular(in particular)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-074",
+    "index": 74,
+    "sourceSentence": "In essen_ _, the two theories are trying to explain the same phenomenon.",
+    "prompt": "In essen  [2], the two theories are trying to explain the same phenomenon.",
+    "answer": "in essence",
+    "acceptedAnswers": [
+      "in essence",
+      "essence"
+    ],
+    "sourceAnswer": "essence(in essence)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-075",
+    "index": 75,
+    "sourceSentence": "As far as the economy is conce_ _ _ _, the outlook is positive.",
+    "prompt": "As far as the economy is conce  [4], the outlook is positive.",
+    "answer": "as far as...is concerned",
+    "acceptedAnswers": [
+      "as far as...is concerned",
+      "concerned"
+    ],
+    "sourceAnswer": "concerned(as far as...is concerned)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-076",
+    "index": 76,
+    "sourceSentence": "In the lo_ _ run, investing in education benefits the whole country.",
+    "prompt": "In the lo  [2] run, investing in education benefits the whole country.",
+    "answer": "in the long run",
+    "acceptedAnswers": [
+      "in the long run",
+      "long"
+    ],
+    "sourceAnswer": "long(in the long run)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-077",
+    "index": 77,
+    "sourceSentence": "By mea_ _ of advanced sensors, the robot can navigate obstacles.",
+    "prompt": "By mea  [2] of advanced sensors, the robot can navigate obstacles.",
+    "answer": "by means of",
+    "acceptedAnswers": [
+      "by means of",
+      "means"
+    ],
+    "sourceAnswer": "means(by means of)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-078",
+    "index": 78,
+    "sourceSentence": "For the sa_ _ of clarity, the author provided several examples.",
+    "prompt": "For the sa  [2] of clarity, the author provided several examples.",
+    "answer": "for the sake of",
+    "acceptedAnswers": [
+      "for the sake of",
+      "sake"
+    ],
+    "sourceAnswer": "sake(for the sake of)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-079",
+    "index": 79,
+    "sourceSentence": "Provi_ _ _ that we act now, we can still save the coral reefs.",
+    "prompt": "Provi  [3] that we act now, we can still save the coral reefs.",
+    "answer": "provided that",
+    "acceptedAnswers": [
+      "provided that",
+      "provided"
+    ],
+    "sourceAnswer": "provided(provided that)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-080",
+    "index": 80,
+    "sourceSentence": "Not only did they find water, but al_ _ evidence of ancient life.",
+    "prompt": "Not only did they find water, but al  [2] evidence of ancient life.",
+    "answer": "not only...but also",
+    "acceptedAnswers": [
+      "not only...but also",
+      "also"
+    ],
+    "sourceAnswer": "also(not only...but also)",
+    "explanation": "",
+    "section": "逻辑连接"
+  },
+  {
+    "id": "exercise-081",
+    "index": 81,
+    "sourceSentence": "The committee had to make a deci_ _ _ _ regarding the budget.",
+    "prompt": "The committee had to make a deci  [4] regarding the budget.",
+    "answer": "make a decision",
+    "acceptedAnswers": [
+      "make a decision",
+      "decision"
+    ],
+    "sourceAnswer": "decision(make a decision)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-082",
+    "index": 82,
+    "sourceSentence": "The new irrigation system was built to meet the nee_ _ of local farmers.",
+    "prompt": "The new irrigation system was built to meet the nee  [2] of local farmers.",
+    "answer": "meet the needs of",
+    "acceptedAnswers": [
+      "meet the needs of",
+      "needs"
+    ],
+    "sourceAnswer": "needs(meet the needs of)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-083",
+    "index": 83,
+    "sourceSentence": "Authorities must take meas_ _ _ _ to prevent further soil degradation.",
+    "prompt": "Authorities must take meas  [4] to prevent further soil degradation.",
+    "answer": "take measures to",
+    "acceptedAnswers": [
+      "take measures to",
+      "measures"
+    ],
+    "sourceAnswer": "measures(take measures to)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-084",
+    "index": 84,
+    "sourceSentence": "The discovery will pave the w_ _ for new treatments for the disease.",
+    "prompt": "The discovery will pave the w  [2] for new treatments for the disease.",
+    "answer": "pave the way for",
+    "acceptedAnswers": [
+      "pave the way for",
+      "way"
+    ],
+    "sourceAnswer": "way(pave the way for)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-085",
+    "index": 85,
+    "sourceSentence": "Microorganisms play a cruci_ _ role in the decomposition process.",
+    "prompt": "Microorganisms play a cruci  [2] role in the decomposition process.",
+    "answer": "play a crucial role in",
+    "acceptedAnswers": [
+      "play a crucial role in",
+      "crucial"
+    ],
+    "sourceAnswer": "crucial(play a crucial role in)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-086",
+    "index": 86,
+    "sourceSentence": "Students are encouraged to study at their o_ _ pace.",
+    "prompt": "Students are encouraged to study at their o  [2] pace.",
+    "answer": "at their own pace",
+    "acceptedAnswers": [
+      "at their own pace",
+      "own"
+    ],
+    "sourceAnswer": "own(at their own pace)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-087",
+    "index": 87,
+    "sourceSentence": "Over ti_ _, the constant wind eroded the soft sandstone.",
+    "prompt": "Over ti  [2], the constant wind eroded the soft sandstone.",
+    "answer": "over time",
+    "acceptedAnswers": [
+      "over time",
+      "time"
+    ],
+    "sourceAnswer": "time(over time)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-088",
+    "index": 88,
+    "sourceSentence": "For exam_ _ _, the honeybee is vital for the pollination of crops.",
+    "prompt": "For exam  [3], the honeybee is vital for the pollination of crops.",
+    "answer": "for example",
+    "acceptedAnswers": [
+      "for example",
+      "example"
+    ],
+    "sourceAnswer": "example(for example)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-089",
+    "index": 89,
+    "sourceSentence": "Cities often have a high dens_ _ _ of high-rise buildings.",
+    "prompt": "Cities often have a high dens  [3] of high-rise buildings.",
+    "answer": "a high density of",
+    "acceptedAnswers": [
+      "a high density of",
+      "density"
+    ],
+    "sourceAnswer": "density(a high density of)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-090",
+    "index": 90,
+    "sourceSentence": "The university offers a wide ran_ _ of courses in the humanities.",
+    "prompt": "The university offers a wide ran  [2] of courses in the humanities.",
+    "answer": "a wide range of",
+    "acceptedAnswers": [
+      "a wide range of",
+      "range"
+    ],
+    "sourceAnswer": "range(a wide range of)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-091",
+    "index": 91,
+    "sourceSentence": "The reforestation project was conducted on a lar_ _ sca_ _.",
+    "prompt": "The reforestation project was conducted on a lar  [2] sca  [2].",
+    "answer": "on a large scale",
+    "acceptedAnswers": [
+      "on a large scale",
+      "large scale"
+    ],
+    "sourceAnswer": "large scale(on a large scale)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-092",
+    "index": 92,
+    "sourceSentence": "Poor nutrition is often link_ _ to various chronic illnesses.",
+    "prompt": "Poor nutrition is often link  [2] to various chronic illnesses.",
+    "answer": "be linked to",
+    "acceptedAnswers": [
+      "be linked to",
+      "linked"
+    ],
+    "sourceAnswer": "linked(be linked to)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-093",
+    "index": 93,
+    "sourceSentence": "When analyzing data, one must bear in mi_ _ the margin of error.",
+    "prompt": "When analyzing data, one must bear in mi  [2] the margin of error.",
+    "answer": "bear in mind",
+    "acceptedAnswers": [
+      "bear in mind",
+      "mind"
+    ],
+    "sourceAnswer": "mind(bear in mind)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-094",
+    "index": 94,
+    "sourceSentence": "By and lar_ _, the project was considered a huge success.",
+    "prompt": "By and lar  [2], the project was considered a huge success.",
+    "answer": "by and large",
+    "acceptedAnswers": [
+      "by and large",
+      "large"
+    ],
+    "sourceAnswer": "large(by and large)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-095",
+    "index": 95,
+    "sourceSentence": "In oth_ _ wor_ _, the species cannot survive without its host plant.",
+    "prompt": "In oth  [2] wor  [2], the species cannot survive without its host plant.",
+    "answer": "in other words",
+    "acceptedAnswers": [
+      "in other words",
+      "other words"
+    ],
+    "sourceAnswer": "other words(in other words)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-096",
+    "index": 96,
+    "sourceSentence": "To some exte_ _, the results were influenced by the small sample size.",
+    "prompt": "To some exte  [2], the results were influenced by the small sample size.",
+    "answer": "to some extent",
+    "acceptedAnswers": [
+      "to some extent",
+      "extent"
+    ],
+    "sourceAnswer": "extent(to some extent)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-097",
+    "index": 97,
+    "sourceSentence": "From a point of vi_ _, the reform was necessary for progress.",
+    "prompt": "From a point of vi  [2], the reform was necessary for progress.",
+    "answer": "from a point of view",
+    "acceptedAnswers": [
+      "from a point of view",
+      "view"
+    ],
+    "sourceAnswer": "view(from a point of view)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-098",
+    "index": 98,
+    "sourceSentence": "The region is notab_ _ for its production of high-quality marble.",
+    "prompt": "The region is notab  [2] for its production of high-quality marble.",
+    "answer": "be notable for",
+    "acceptedAnswers": [
+      "be notable for",
+      "notable"
+    ],
+    "sourceAnswer": "notable(be notable for)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-099",
+    "index": 99,
+    "sourceSentence": "Humans are respon_ _ _ _ _ for the majority of modern extinctions.",
+    "prompt": "Humans are respon  [5] for the majority of modern extinctions.",
+    "answer": "be responsible for",
+    "acceptedAnswers": [
+      "be responsible for",
+      "responsible"
+    ],
+    "sourceAnswer": "responsible(be responsible for)",
+    "explanation": "",
+    "section": "学术表达"
+  },
+  {
+    "id": "exercise-100",
+    "index": 100,
+    "sourceSentence": "Scientists must take into acco_ _ _ the effect of ocean currents.",
+    "prompt": "Scientists must take into acco  [3] the effect of ocean currents.",
+    "answer": "take into account",
+    "acceptedAnswers": [
+      "take into account",
+      "account"
+    ],
+    "sourceAnswer": "account(take into account)",
+    "explanation": "",
+    "section": "学术表达"
+  }
+]
