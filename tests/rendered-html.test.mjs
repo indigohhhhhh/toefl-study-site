@@ -98,3 +98,11 @@ test("service worker refreshes deployed assets before using its offline cache", 
   assert.match(source, /updateViaCache: "none"/);
   assert.match(source, /controllerchange/);
 });
+
+test("repairs a fully completed legacy batch that was never finalized", async () => {
+  const source = await readFile(new URL("../app/StudyApp.tsx", import.meta.url), "utf8");
+  assert.match(source, /wordTasksDone/);
+  assert.match(source, /phraseTasksDone/);
+  assert.match(source, /if \(current\.daily\.submitted\) return current/);
+  assert.match(source, /daily: \{ \.\.\.current\.daily, submitted: true, continuousLearning: false \}/);
+});

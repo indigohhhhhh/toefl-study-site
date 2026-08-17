@@ -228,6 +228,51 @@ export default function StudyApp({
     }
   }, [toast]);
 
+  useEffect(() => {
+    if (!ready || state.daily.submitted || reviewsDue.length > 0 || (!activeWords.length && !activePhrases.length)) return;
+    const completed = state.daily.completed;
+    const wordTasksDone = !activeWords.length
+      || (completed.vocabularyLearn && completed.vocabularySpelling && completed.vocabularyCloze);
+    const phraseTasksDone = !activePhrases.length
+      || (completed.phraseLearn && completed.phraseSpelling);
+    if (!wordTasksDone || !phraseTasksDone) return;
+
+    const repairTimer = window.setTimeout(() => {
+      updateState((current) => {
+        if (current.daily.submitted) return current;
+        const currentWordCount = current.settings.temporaryVocabularySize ?? current.settings.vocabularyBatchSize;
+        const currentPhraseCount = current.settings.temporaryPhraseSize ?? current.settings.phraseBatchSize;
+        const learnedWords = Array.from({ length: currentWordCount }, (_, index) => current.progress.vocabularyNextIndex + index)
+          .filter((index) => index <= vocabulary.length);
+        const learnedPhrases = Array.from({ length: currentPhraseCount }, (_, index) => current.progress.phraseNextIndex + index)
+          .filter((index) => index <= phrases.length);
+        return {
+          ...current,
+          settings: { ...current.settings, temporaryVocabularySize: null, temporaryPhraseSize: null },
+          progress: {
+            ...current.progress,
+            vocabularyNextIndex: Math.min(vocabulary.length + 1, current.progress.vocabularyNextIndex + learnedWords.length),
+            phraseNextIndex: Math.min(phrases.length + 1, current.progress.phraseNextIndex + learnedPhrases.length),
+            learnedVocabulary: uniqueNumbers([...current.progress.learnedVocabulary, ...learnedWords]),
+            learnedPhrases: uniqueNumbers([...current.progress.learnedPhrases, ...learnedPhrases]),
+          },
+          daily: { ...current.daily, submitted: true, continuousLearning: false },
+        };
+      });
+    }, 0);
+    return () => window.clearTimeout(repairTimer);
+  }, [
+    activePhrases.length,
+    activeWords.length,
+    phrases.length,
+    ready,
+    reviewsDue.length,
+    state.daily.completed,
+    state.daily.submitted,
+    updateState,
+    vocabulary.length,
+  ]);
+
   const setCompleted = (key: keyof StudyState["daily"]["completed"]) => {
     updateState((current) => ({
       ...current,
