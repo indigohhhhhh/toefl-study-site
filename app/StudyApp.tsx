@@ -623,12 +623,136 @@ function Dashboard({
   );
 }
 
+function useWordSelfSpelling(items: VocabularyItem[]) {
+  const [spellingId, setSpellingId] = useState<string | null>(null);
+  const [spellingAnswer, setSpellingAnswer] = useState("");
+  const [spellingResult, setSpellingResult] = useState<"correct" | "wrong" | null>(null);
+  const spellingInputRef = useRef<HTMLInputElement>(null);
+  const activePosition = items.findIndex((item) => item.id === spellingId);
+
+  useEffect(() => {
+    if (spellingId && !spellingResult) spellingInputRef.current?.focus();
+  }, [spellingId, spellingResult]);
+
+  const restore = () => {
+    setSpellingId(null);
+    setSpellingAnswer("");
+    setSpellingResult(null);
+  };
+
+  const start = (itemId: string) => {
+    setSpellingId(itemId);
+    setSpellingAnswer("");
+    setSpellingResult(null);
+  };
+
+  const confirm = (item: VocabularyItem) => {
+    if (!spellingAnswer.trim() || spellingResult) return;
+    setSpellingResult(normalizedAnswer(spellingAnswer) === normalizedAnswer(item.word) ? "correct" : "wrong");
+  };
+
+  const retry = () => {
+    setSpellingAnswer("");
+    setSpellingResult(null);
+  };
+
+  const next = () => {
+    const nextItem = items[activePosition + 1];
+    if (nextItem) start(nextItem.id);
+    else restore();
+  };
+
+  return {
+    activeId: spellingId,
+    answer: spellingAnswer,
+    result: spellingResult,
+    inputRef: spellingInputRef,
+    hasNext: activePosition >= 0 && activePosition < items.length - 1,
+    setAnswer: setSpellingAnswer,
+    start,
+    confirm,
+    retry,
+    next,
+    restore,
+  };
+}
+
+function WordSelfSpellingPanel({ item, spelling }: { item: VocabularyItem; spelling: ReturnType<typeof useWordSelfSpelling> }) {
+  return (
+    <div className="library-spelling-panel">
+      {!spelling.result ? (
+        <>
+          <p>请根据中文释义拼写英文；本次练习不计入错题。</p>
+          <div className="spelling-action-row">
+            <button className="secondary-button" disabled={!spelling.answer.trim()} onClick={() => spelling.confirm(item)}>确认</button>
+            <button className="secondary-button" onClick={spelling.restore}>还原</button>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className={`spelling-feedback ${spelling.result}`} role="status">
+            {spelling.result === "correct" ? "拼写正确" : "拼写错误"}，正确拼写：<strong>{item.word}</strong>
+          </p>
+          <div className="spelling-action-row">
+            {spelling.result === "wrong" ? (
+              <button className="secondary-button" onClick={spelling.retry}>重新拼写</button>
+            ) : (
+              <button className="secondary-button" onClick={spelling.next}>{spelling.hasNext ? "下一个单词" : "结束练习"}</button>
+            )}
+            <button className="secondary-button" onClick={spelling.restore}>还原</button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function WordLearning({ items, onDone }: { items: VocabularyItem[]; onDone(): void }) {
+  const spelling = useWordSelfSpelling(items);
   return (
     <section className="learning-page">
-      <div className="section-intro"><span className="pill">新单词 · {items.length} 个</span><h2>先理解，再检查拼写</h2><p>每个词都来自 800 词资料。例句填空会在拼写抽查之后单独进行。</p></div>
+      <div className="section-intro"><span className="pill">新单词 · {items.length} 个</span><h2>先理解，再检查拼写</h2><p>每个词都来自 800 词资料。卡片内可自由拼写且不计错题；正式拼写抽查仍在下一步进行。</p></div>
       <div className="study-card-grid">
-        {items.map((item) => <article className="study-card" key={item.id}><div className="card-number">{item.index}</div><div className="word-heading"><h3>{item.word}</h3><span>{item.partOfSpeech}</span></div><p className="pronunciation">{item.pronunciation}</p><p className="meaning">{item.meaningsZh}</p><details><summary>查看释义、记忆和例句</summary><p><strong>英文释义：</strong>{item.definitionEn}</p>{item.mnemonic && <p><strong>记忆：</strong>{item.mnemonic}</p>}<p className="example"><strong>例句：</strong>{item.example}</p></details></article>)}
+        {items.map((item) => {
+          const active = spelling.activeId === item.id;
+          return (
+            <article className={`study-card ${active ? "spelling-active" : ""}`} key={item.id}>
+              <div className="card-number">{item.index}</div>
+              <div className="word-heading">
+                {active ? (
+                  <input
+                    className="library-spelling-input study-spelling-input"
+                    aria-label={`根据“${item.meaningsZh}”拼写英文单词`}
+                    autoComplete="off"
+                    disabled={Boolean(spelling.result)}
+                    placeholder="请输入英文拼写"
+                    ref={spelling.inputRef}
+                    spellCheck={false}
+                    value={spelling.answer}
+                    onChange={(event) => spelling.setAnswer(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") spelling.confirm(item);
+                    }}
+                  />
+                ) : <h3>{item.word}</h3>}
+                <span>{item.partOfSpeech}</span>
+                {!active && <button className="spelling-button" onClick={() => spelling.start(item.id)}>拼写</button>}
+              </div>
+              {active ? (
+                <>
+                  <p className="meaning">{item.meaningsZh}</p>
+                  <WordSelfSpellingPanel item={item} spelling={spelling} />
+                </>
+              ) : (
+                <>
+                  <p className="pronunciation">{item.pronunciation}</p>
+                  <p className="meaning">{item.meaningsZh}</p>
+                  <details><summary>查看释义、记忆和例句</summary><p><strong>英文释义：</strong>{item.definitionEn}</p>{item.mnemonic && <p><strong>记忆：</strong>{item.mnemonic}</p>}<p className="example"><strong>例句：</strong>{item.example}</p></details>
+                </>
+              )}
+            </article>
+          );
+        })}
       </div>
       <div className="sticky-action"><div><strong>已经学习完这 {items.length} 个单词？</strong><small>下一步不提供任何拼写提示。</small></div><button className="primary-button" onClick={onDone}>开始整组拼写 →</button></div>
     </section>
@@ -811,38 +935,8 @@ function WrongExplanation({ result }: { result: GradeResult }) {
 
 function WordLibrary({ items, learned }: { items: VocabularyItem[]; learned: number[] }) {
   const [query, setQuery] = useState("");
-  const [spellingId, setSpellingId] = useState<string | null>(null);
-  const [spellingAnswer, setSpellingAnswer] = useState("");
-  const [spellingResult, setSpellingResult] = useState<"correct" | "wrong" | null>(null);
-  const spellingInputRef = useRef<HTMLInputElement>(null);
   const filtered = items.filter((item) => `${item.word} ${item.meaningsZh}`.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 80);
-
-  useEffect(() => {
-    if (spellingId) spellingInputRef.current?.focus();
-  }, [spellingId]);
-
-  const resetSpelling = () => {
-    setSpellingId(null);
-    setSpellingAnswer("");
-    setSpellingResult(null);
-  };
-
-  const startSpelling = (itemId: string) => {
-    setSpellingId(itemId);
-    setSpellingAnswer("");
-    setSpellingResult(null);
-  };
-
-  const confirmSpelling = (item: VocabularyItem) => {
-    if (!spellingAnswer.trim() || spellingResult) return;
-    setSpellingResult(normalizedAnswer(spellingAnswer) === normalizedAnswer(item.word) ? "correct" : "wrong");
-  };
-
-  const moveToNextWord = (item: VocabularyItem) => {
-    const nextItem = filtered[filtered.findIndex((candidate) => candidate.id === item.id) + 1];
-    if (nextItem) startSpelling(nextItem.id);
-    else resetSpelling();
-  };
+  const spelling = useWordSelfSpelling(filtered);
 
   return (
     <section className="library-page">
@@ -853,14 +947,12 @@ function WordLibrary({ items, learned }: { items: VocabularyItem[]; learned: num
         value={query}
         onChange={(event) => {
           setQuery(event.target.value);
-          resetSpelling();
+          spelling.restore();
         }}
       />
       <div className="library-grid">
         {filtered.map((item) => {
-          const active = spellingId === item.id;
-          const itemPosition = filtered.findIndex((candidate) => candidate.id === item.id);
-          const hasNextItem = itemPosition >= 0 && itemPosition < filtered.length - 1;
+          const active = spelling.activeId === item.id;
           return (
             <article className={`library-card ${active ? "spelling-active" : ""}`} key={item.id}>
               <div className="library-card-heading">
@@ -871,14 +963,14 @@ function WordLibrary({ items, learned }: { items: VocabularyItem[]; learned: num
                       className="library-spelling-input"
                       aria-label={`根据“${item.meaningsZh}”拼写英文单词`}
                       autoComplete="off"
-                      disabled={Boolean(spellingResult)}
+                      disabled={Boolean(spelling.result)}
                       placeholder="请输入英文拼写"
-                      ref={spellingInputRef}
+                      ref={spelling.inputRef}
                       spellCheck={false}
-                      value={spellingAnswer}
-                      onChange={(event) => setSpellingAnswer(event.target.value)}
+                      value={spelling.answer}
+                      onChange={(event) => spelling.setAnswer(event.target.value)}
                       onKeyDown={(event) => {
-                        if (event.key === "Enter") confirmSpelling(item);
+                        if (event.key === "Enter") spelling.confirm(item);
                       }}
                     />
                   ) : <strong>{item.word}</strong>}
@@ -886,25 +978,11 @@ function WordLibrary({ items, learned }: { items: VocabularyItem[]; learned: num
                 </div>
                 <div className="library-card-actions">
                   <i>{learned.includes(item.index) ? "已学" : "未学"}</i>
-                  {!active && <button className="spelling-button" onClick={() => startSpelling(item.id)}>拼写</button>}
+                  {!active && <button className="spelling-button" onClick={() => spelling.start(item.id)}>拼写</button>}
                 </div>
               </div>
               {active ? (
-                <div className="library-spelling-panel">
-                  {!spellingResult ? (
-                    <>
-                      <p>请根据中文释义拼写英文；本次练习不计入错题。</p>
-                      <button className="secondary-button" disabled={!spellingAnswer.trim()} onClick={() => confirmSpelling(item)}>确认</button>
-                    </>
-                  ) : (
-                    <>
-                      <p className={`spelling-feedback ${spellingResult}`} role="status">
-                        {spellingResult === "correct" ? "拼写正确" : "拼写错误"}，正确拼写：<strong>{item.word}</strong>
-                      </p>
-                      <button className="secondary-button" onClick={() => moveToNextWord(item)}>{hasNextItem ? "下一个单词" : "结束练习"}</button>
-                    </>
-                  )}
-                </div>
+                <WordSelfSpellingPanel item={item} spelling={spelling} />
               ) : (
                 <details className="library-card-details">
                   <summary>查看发音、英文释义和例句</summary>

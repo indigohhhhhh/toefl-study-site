@@ -89,10 +89,13 @@ h1 { margin:8px 0 0; font-size:clamp(27px,3vw,40px); letter-spacing:-.04em; }
 .section-intro p { color:var(--muted); line-height:1.75; }
 .study-card-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
 .study-card { position:relative; background:white; border:1px solid var(--line); border-radius:20px; padding:24px; overflow:hidden; }
+.study-card.spelling-active { border-color:#94bead; box-shadow:0 8px 24px rgba(17,84,65,.07); }
 .card-number { position:absolute; right:18px; top:17px; color:#b8c4bf; font:bold 33px Georgia,serif; }
-.word-heading { display:flex; align-items:baseline; gap:10px; padding-right:48px; }
+.word-heading { display:flex; align-items:center; flex-wrap:wrap; gap:10px; padding-right:48px; }
 .word-heading h3 { margin:0; font-size:25px; letter-spacing:-.02em; }
 .word-heading span { color:var(--green); font-size:12px; font-weight:700; }
+.word-heading .spelling-button { margin-left:2px; }
+.study-spelling-input { flex:1 1 210px; }
 .pronunciation { color:var(--muted); font-size:13px; margin:8px 0; }
 .meaning { color:var(--green); font-weight:700; line-height:1.65; }
 .study-card details { margin-top:14px; padding-top:14px; border-top:1px solid var(--line); }
@@ -165,7 +168,8 @@ h1 { margin:8px 0 0; font-size:clamp(27px,3vw,40px); letter-spacing:-.04em; }
 .library-spelling-input:disabled { opacity:1; background:#eef3f0; color:var(--muted); }
 .library-spelling-panel { display:flex; justify-content:space-between; align-items:center; gap:14px; border-top:1px solid var(--line); padding:13px 0 15px; }
 .library-spelling-panel p { margin:0; color:var(--muted); font-size:13px; line-height:1.6; }
-.library-spelling-panel .secondary-button { flex:0 0 auto; }
+.spelling-action-row { display:flex; align-items:center; justify-content:flex-end; gap:8px; flex:0 0 auto; }
+.spelling-action-row .secondary-button { white-space:nowrap; }
 .spelling-feedback.correct { color:#176a51; }
 .spelling-feedback.wrong { color:#993f28; }
 .center { text-align:center; }
@@ -244,6 +248,7 @@ h1 { margin:8px 0 0; font-size:clamp(27px,3vw,40px); letter-spacing:-.04em; }
   .library-card-heading { grid-template-columns:30px minmax(0,1fr); }
   .library-card-actions { grid-column:2; justify-content:flex-start; }
   .library-spelling-panel { align-items:stretch; flex-direction:column; }
+  .spelling-action-row { justify-content:flex-start; }
   .wrong-explanation dl,.stats-grid { grid-template-columns:1fr; }
   .phrase-study-list article,.phrase-library article { grid-template-columns:36px 1fr; }
   .phrase-study-list article > small,.phrase-library i { grid-column:2; }

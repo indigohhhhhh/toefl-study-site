@@ -88,14 +88,18 @@ test("word spelling correction uses the same strict comparison", () => {
   assert.notEqual(normalizedAnswer("errosion"), normalizedAnswer("erosion"));
 });
 
-test("word library offers isolated self-practice spelling", async () => {
+test("word cards offer retry-gated isolated self-practice spelling", async () => {
   const source = await readFile(new URL("../app/StudyApp.tsx", import.meta.url), "utf8");
   const wordLibrary = source.slice(source.indexOf("function WordLibrary"), source.indexOf("function PhraseLibrary"));
+  const wordLearning = source.slice(source.indexOf("function WordLearning"), source.indexOf("function PhraseLearning"));
   assert.match(wordLibrary, /自由拼写也不会计入错题或正式进度/);
-  assert.match(wordLibrary, /normalizedAnswer\(spellingAnswer\) === normalizedAnswer\(item\.word\)/);
-  assert.match(wordLibrary, /正确拼写/);
-  assert.match(wordLibrary, /下一个单词/);
-  assert.match(wordLibrary, /resetSpelling/);
+  assert.match(source, /normalizedAnswer\(spellingAnswer\) === normalizedAnswer\(item\.word\)/);
+  assert.match(wordLearning, /spelling\.start\(item\.id\)/);
+  assert.match(source, /spelling\.result === "wrong"/);
+  assert.match(source, /重新拼写/);
+  assert.match(source, /下一个单词/);
+  assert.match(source, /还原/);
+  assert.match(source, /正确拼写/);
   assert.doesNotMatch(wordLibrary, /\/api\/grade|setState|handleResults/);
 });
 
