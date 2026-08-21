@@ -84,6 +84,7 @@ export type StudyState = {
     selfSpellingCorrect: Record<string, number>;
   };
   notebook: {
+    text: string;
     notes: StudyNote[];
   };
   daily: {

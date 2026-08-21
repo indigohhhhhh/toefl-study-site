@@ -126,12 +126,17 @@ test("notebook stores anchored selections and reopens their canonical source", a
   ]);
   assert.match(types, /export type StudyNote/);
   assert.match(types, /startOffset: number/);
-  assert.match(state, /notebook: \{ notes: \[\] \}/);
+  assert.match(state, /notebook: \{ text: "", notes: \[\] \}/);
   assert.match(source, /function NotebookWidget/);
+  assert.match(types, /notebook: \{[\s\S]*text: string/);
+  assert.match(source, /随时在这里记录内容/);
+  assert.match(source, /onTextChange\(event\.target\.value\)/);
   assert.match(source, /data-note-anchor/);
   assert.match(source, /scrollIntoView/);
   assert.match(source, /selectNoteRange/);
   assert.match(source, /保存注释/);
+  assert.match(source, /className="notebook-launcher"[\s\S]*onPointerDown=\{beginDrag\}/);
+  assert.match(source, /dragMovedRef/);
   assert.match(styles, /\.notebook-widget/);
   assert.match(styles, /cursor:move/);
 });

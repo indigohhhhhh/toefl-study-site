@@ -200,7 +200,14 @@ export default function StudyApp({
   const addNote = useCallback((note: StudyNote) => {
     updateState((current) => ({
       ...current,
-      notebook: { notes: [note, ...current.notebook.notes] },
+      notebook: { ...current.notebook, notes: [note, ...current.notebook.notes] },
+    }));
+  }, [updateState]);
+
+  const updateNotebookText = useCallback((text: string) => {
+    updateState((current) => ({
+      ...current,
+      notebook: { ...current.notebook, text },
     }));
   }, [updateState]);
 
@@ -571,7 +578,7 @@ export default function StudyApp({
         <NavButton active={view === "errors"} onClick={() => navigate("errors")} label="错题" />
         <NavButton active={view === "settings"} onClick={() => navigate("settings")} label="设置" />
       </nav>
-      <NotebookWidget notes={state.notebook.notes} onAdd={addNote} onOpenNote={openNote} />
+      <NotebookWidget text={state.notebook.text} notes={state.notebook.notes} onTextChange={updateNotebookText} onAdd={addNote} onOpenNote={openNote} />
       {toast && <div className="toast" role="status">{toast}</div>}
     </main>
   );
@@ -583,13 +590,15 @@ function NavButton({ active, onClick, label, badge }: { active: boolean; onClick
 
 type NoteDraft = Omit<StudyNote, "id" | "body" | "createdAt">;
 
-function NotebookWidget({ notes, onAdd, onOpenNote }: { notes: StudyNote[]; onAdd(note: StudyNote): void; onOpenNote(note: StudyNote): void }) {
+function NotebookWidget({ text, notes, onTextChange, onAdd, onOpenNote }: { text: string; notes: StudyNote[]; onTextChange(text: string): void; onAdd(note: StudyNote): void; onOpenNote(note: StudyNote): void }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<NoteDraft | null>(null);
   const [body, setBody] = useState("");
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const widgetRef = useRef<HTMLElement>(null);
-  const dragRef = useRef<{ pointerId: number; offsetX: number; offsetY: number } | null>(null);
+  const dragRef = useRef<{ pointerId: number; offsetX: number; offsetY: number; startX: number; startY: number } | null>(null);
+  const dragPositionRef = useRef<{ x: number; y: number } | null>(null);
+  const dragMovedRef = useRef(false);
 
   useEffect(() => {
     let savedPosition: { x: number; y: number } | null = null;
@@ -661,28 +670,57 @@ function NotebookWidget({ notes, onAdd, onOpenNote }: { notes: StudyNote[]; onAd
     };
   }, []);
 
-  const beginDrag = (event: React.PointerEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).closest("button") || !widgetRef.current) return;
+  const beginDrag = (event: React.PointerEvent<HTMLElement>) => {
+    const targetButton = (event.target as HTMLElement).closest("button");
+    if ((targetButton && targetButton !== event.currentTarget) || !widgetRef.current) return;
     const bounds = widgetRef.current.getBoundingClientRect();
-    dragRef.current = { pointerId: event.pointerId, offsetX: event.clientX - bounds.left, offsetY: event.clientY - bounds.top };
-    setPosition({ x: bounds.left, y: bounds.top });
+    const currentPosition = { x: bounds.left, y: bounds.top };
+    dragMovedRef.current = false;
+    dragPositionRef.current = currentPosition;
+    dragRef.current = { pointerId: event.pointerId, offsetX: event.clientX - bounds.left, offsetY: event.clientY - bounds.top, startX: event.clientX, startY: event.clientY };
+    setPosition(currentPosition);
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
-  const moveDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+  const moveDrag = (event: React.PointerEvent<HTMLElement>) => {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId || !widgetRef.current) return;
     const bounds = widgetRef.current.getBoundingClientRect();
-    setPosition({
+    if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 4) dragMovedRef.current = true;
+    const nextPosition = {
       x: Math.min(Math.max(8, event.clientX - drag.offsetX), Math.max(8, window.innerWidth - bounds.width - 8)),
       y: Math.min(Math.max(8, event.clientY - drag.offsetY), Math.max(8, window.innerHeight - bounds.height - 8)),
-    });
+    };
+    dragPositionRef.current = nextPosition;
+    setPosition(nextPosition);
   };
 
-  const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+  const endDrag = (event: React.PointerEvent<HTMLElement>) => {
     if (dragRef.current?.pointerId !== event.pointerId) return;
     dragRef.current = null;
-    if (position) localStorage.setItem(NOTEBOOK_POSITION_KEY, JSON.stringify(position));
+    const finalPosition = dragPositionRef.current;
+    if (finalPosition) localStorage.setItem(NOTEBOOK_POSITION_KEY, JSON.stringify(finalPosition));
+    if (event.type === "pointercancel") dragMovedRef.current = false;
+  };
+
+  const openNotebook = () => {
+    if (dragMovedRef.current) {
+      dragMovedRef.current = false;
+      return;
+    }
+    if (widgetRef.current && position) {
+      const bounds = widgetRef.current.getBoundingClientRect();
+      const openWidth = Math.min(300, window.innerWidth - 16);
+      const openHeight = Math.min(390, Math.max(160, window.innerHeight - 90));
+      const fittedPosition = {
+        x: Math.min(Math.max(8, bounds.left), Math.max(8, window.innerWidth - openWidth - 8)),
+        y: Math.min(Math.max(8, bounds.top), Math.max(8, window.innerHeight - openHeight - 8)),
+      };
+      dragPositionRef.current = fittedPosition;
+      setPosition(fittedPosition);
+      localStorage.setItem(NOTEBOOK_POSITION_KEY, JSON.stringify(fittedPosition));
+    }
+    setOpen(true);
   };
 
   const clearDraft = () => {
@@ -706,7 +744,16 @@ function NotebookWidget({ notes, onAdd, onOpenNote }: { notes: StudyNote[]; onAd
   return (
     <aside className={`notebook-widget ${open ? "open" : "collapsed"}`} style={style} ref={widgetRef} aria-label="笔记本">
       {!open ? (
-        <button className="notebook-launcher" onClick={() => setOpen(true)}>笔记 <span>{notes.length}</span></button>
+        <button
+          className="notebook-launcher"
+          aria-label={`笔记本，共 ${notes.length} 条笔记；点击打开，拖动移动`}
+          title="点击打开，拖动移动"
+          onClick={openNotebook}
+          onPointerDown={beginDrag}
+          onPointerMove={moveDrag}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+        >笔记 <span>{notes.length}</span></button>
       ) : (
         <>
           <div className="notebook-header" onPointerDown={beginDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}>
@@ -714,6 +761,11 @@ function NotebookWidget({ notes, onAdd, onOpenNote }: { notes: StudyNote[]; onAd
             <button aria-label="收起笔记本" onClick={() => setOpen(false)}>—</button>
           </div>
           <div className="notebook-content">
+            <label className="free-notebook-editor">
+              <span>自由笔记</span>
+              <textarea aria-label="自由笔记" placeholder="随时在这里记录内容……" value={text} onChange={(event) => onTextChange(event.target.value)} />
+              <small>内容会自动保存到学习记录。</small>
+            </label>
             {draft ? (
               <section className="note-compose">
                 <span>{draft.label}</span>
@@ -722,7 +774,7 @@ function NotebookWidget({ notes, onAdd, onOpenNote }: { notes: StudyNote[]; onAd
                 <div className="notebook-actions"><button className="text-button" onClick={clearDraft}>取消</button><button className="secondary-button" disabled={!body.trim()} onClick={saveNote}>保存注释</button></div>
               </section>
             ) : notes.length ? (
-              <div className="notebook-list">
+              <div className="notebook-list"><strong className="notebook-section-title">资料注释</strong>
                 {notes.map((note) => (
                   <button className="notebook-note" key={note.id} onClick={() => { setOpen(false); onOpenNote(note); }}>
                     <span>{note.label}</span>
@@ -732,7 +784,7 @@ function NotebookWidget({ notes, onAdd, onOpenNote }: { notes: StudyNote[]; onAd
                 ))}
               </div>
             ) : (
-              <div className="notebook-empty"><strong>还没有注释</strong><p>在单词或词组资料中选中文字，就能在这里添加注释。</p></div>
+              <div className="notebook-empty"><strong>还没有资料注释</strong><p>上面的文字簿可以直接使用；选中文字添加注释是补充功能。</p></div>
             )}
           </div>
         </>

@@ -49,7 +49,7 @@ export function createInitialState(date = beijingDate()): StudyState {
       reviews: seededReviews,
       selfSpellingCorrect: {},
     },
-    notebook: { notes: [] },
+    notebook: { text: "", notes: [] },
     daily: {
       date,
       submitted: false,
@@ -81,7 +81,7 @@ export function rollStateToToday(state: StudyState, date = beijingDate()): Study
   const normalized: StudyState = {
     ...state,
     progress: { ...state.progress, comprehensiveExerciseNextIndex, selfSpellingCorrect },
-    notebook: { notes },
+    notebook: { text: typeof state.notebook?.text === "string" ? state.notebook.text : "", notes },
     daily: { ...state.daily, continuousLearning: state.daily.continuousLearning === true },
   };
   if (normalized.daily.date === date) return normalized;
