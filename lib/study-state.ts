@@ -47,7 +47,9 @@ export function createInitialState(date = beijingDate()): StudyState {
       learnedVocabulary: Array.from({ length: 15 }, (_, index) => index + 1),
       learnedPhrases: [],
       reviews: seededReviews,
+      selfSpellingCorrect: {},
     },
+    notebook: { notes: [] },
     daily: {
       date,
       submitted: false,
@@ -69,9 +71,17 @@ export function rollStateToToday(state: StudyState, date = beijingDate()): Study
     && state.progress.comprehensiveExerciseNextIndex >= 1
     ? state.progress.comprehensiveExerciseNextIndex
     : 1;
-  const normalized = {
+  const selfSpellingCorrect = Object.fromEntries(
+    Object.entries(state.progress.selfSpellingCorrect ?? {})
+      .filter(([itemId, count]) => itemId && Number.isInteger(count) && count >= 0),
+  );
+  const notes = Array.isArray(state.notebook?.notes)
+    ? state.notebook.notes.filter((note) => note && typeof note.id === "string" && typeof note.anchorId === "string")
+    : [];
+  const normalized: StudyState = {
     ...state,
-    progress: { ...state.progress, comprehensiveExerciseNextIndex },
+    progress: { ...state.progress, comprehensiveExerciseNextIndex, selfSpellingCorrect },
+    notebook: { notes },
     daily: { ...state.daily, continuousLearning: state.daily.continuousLearning === true },
   };
   if (normalized.daily.date === date) return normalized;

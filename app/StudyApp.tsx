@@ -8,6 +8,7 @@ import type {
   PhraseItem,
   QuizKind,
   ReviewItem,
+  StudyNote,
   StudyState,
   VocabularyItem,
 } from "@/lib/study-types";
@@ -41,6 +42,7 @@ type InstallPromptEvent = Event & {
 };
 
 const LOCAL_STATE_KEY = "toefl-study-state-v1-release";
+const NOTEBOOK_POSITION_KEY = "toefl-notebook-position-v1";
 
 function addDays(date: string, days: number): string {
   const parsed = new Date(`${date}T12:00:00+08:00`);
@@ -59,6 +61,40 @@ function shuffled<T extends { id: string }>(items: T[], seed: string): T[] {
 
 function uniqueNumbers(values: number[]): number[] {
   return [...new Set(values)].sort((a, b) => a - b);
+}
+
+function annotationProps(sourceKind: StudyNote["sourceKind"], itemId: string, field: string, label: string) {
+  return {
+    "data-note-anchor": `${sourceKind}:${itemId}:${field}`,
+    "data-note-kind": sourceKind,
+    "data-note-item": itemId,
+    "data-note-field": field,
+    "data-note-label": label,
+  };
+}
+
+function selectNoteRange(element: HTMLElement, startOffset: number, endOffset: number) {
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+  const range = document.createRange();
+  let position = 0;
+  let startSet = false;
+  let node = walker.nextNode();
+  while (node) {
+    const length = node.textContent?.length ?? 0;
+    if (!startSet && startOffset <= position + length) {
+      range.setStart(node, Math.max(0, startOffset - position));
+      startSet = true;
+    }
+    if (startSet && endOffset <= position + length) {
+      range.setEnd(node, Math.max(0, endOffset - position));
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      return;
+    }
+    position += length;
+    node = walker.nextNode();
+  }
 }
 
 function reviewsAfterResults(reviews: ReviewItem[], results: GradeResult[], date: string): ReviewItem[] {
@@ -125,6 +161,7 @@ export default function StudyApp({
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const [toast, setToast] = useState("");
   const [comprehensiveBatchStart, setComprehensiveBatchStart] = useState<number | null>(null);
+  const [noteJump, setNoteJump] = useState<{ note: StudyNote; token: number } | null>(null);
 
   const wordById = useMemo(() => new Map(vocabulary.map((item) => [item.id, item])), [vocabulary]);
   const phraseById = useMemo(() => new Map(phrases.map((item) => [item.id, item])), [phrases]);
@@ -145,6 +182,31 @@ export default function StudyApp({
 
   const updateState = useCallback((change: (current: StudyState) => StudyState) => {
     setState((current) => ({ ...change(current), updatedAt: new Date().toISOString() }));
+  }, []);
+
+  const recordSelfSpellingCorrect = useCallback((itemId: string) => {
+    updateState((current) => ({
+      ...current,
+      progress: {
+        ...current.progress,
+        selfSpellingCorrect: {
+          ...current.progress.selfSpellingCorrect,
+          [itemId]: (current.progress.selfSpellingCorrect[itemId] ?? 0) + 1,
+        },
+      },
+    }));
+  }, [updateState]);
+
+  const addNote = useCallback((note: StudyNote) => {
+    updateState((current) => ({
+      ...current,
+      notebook: { notes: [note, ...current.notebook.notes] },
+    }));
+  }, [updateState]);
+
+  const openNote = useCallback((note: StudyNote) => {
+    setNoteJump({ note, token: Date.now() });
+    setView(note.sourceKind === "word" ? "words" : "phrases");
   }, []);
 
   useEffect(() => {
@@ -182,10 +244,21 @@ export default function StudyApp({
       window.location.reload();
     };
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.addEventListener("controllerchange", controllerChangeHandler);
-      navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" })
-        .then((registration) => registration.update())
-        .catch(() => undefined);
+      if (import.meta.env.PROD) {
+        navigator.serviceWorker.addEventListener("controllerchange", controllerChangeHandler);
+        navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" })
+          .then((registration) => registration.update())
+          .catch(() => undefined);
+      } else {
+        // A development service worker can keep serving an old Vite client after
+        // the local server has stopped. Remove it so localhost always reflects
+        // the live development server and never appears to run in the background.
+        navigator.serviceWorker.getRegistrations()
+          .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+          .then(() => caches.keys())
+          .then((keys) => Promise.all(keys.filter((key) => key.startsWith("toefl-study-shell-")).map((key) => caches.delete(key))))
+          .catch(() => undefined);
+      }
     }
     const installHandler = (event: Event) => {
       event.preventDefault();
@@ -198,7 +271,9 @@ export default function StudyApp({
       window.removeEventListener("online", onlineHandler);
       window.removeEventListener("offline", offlineHandler);
       window.removeEventListener("beforeinstallprompt", installHandler);
-      if ("serviceWorker" in navigator) navigator.serviceWorker.removeEventListener("controllerchange", controllerChangeHandler);
+      if (import.meta.env.PROD && "serviceWorker" in navigator) {
+        navigator.serviceWorker.removeEventListener("controllerchange", controllerChangeHandler);
+      }
     };
   }, [initialState]);
 
@@ -227,6 +302,28 @@ export default function StudyApp({
       return () => window.clearTimeout(timer);
     }
   }, [toast]);
+
+  useEffect(() => {
+    if (!noteJump) return;
+    let highlightTimer = 0;
+    const revealTimer = window.setTimeout(() => {
+      const element = [...document.querySelectorAll<HTMLElement>("[data-note-anchor]")]
+        .find((candidate) => candidate.dataset.noteAnchor === noteJump.note.anchorId);
+      if (!element) return;
+      const details = element.closest("details");
+      if (details) details.open = true;
+      element.classList.remove("note-jump-highlight");
+      void element.offsetWidth;
+      element.classList.add("note-jump-highlight");
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+      selectNoteRange(element, noteJump.note.startOffset, noteJump.note.endOffset);
+      highlightTimer = window.setTimeout(() => element.classList.remove("note-jump-highlight"), 3200);
+    }, 80);
+    return () => {
+      window.clearTimeout(revealTimer);
+      window.clearTimeout(highlightTimer);
+    };
+  }, [noteJump, view]);
 
   useEffect(() => {
     if (!ready || state.daily.submitted || reviewsDue.length > 0 || (!activeWords.length && !activePhrases.length)) return;
@@ -412,6 +509,7 @@ export default function StudyApp({
     if (learningViews.includes(target) && reviewsDue.length === 0 && !state.daily.completed.reviews) {
       setCompleted("reviews");
     }
+    setNoteJump(null);
     setView(target);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -428,15 +526,15 @@ export default function StudyApp({
 
   const page = (() => {
     if (view === "today") return <Dashboard state={state} reviewsDue={reviewsDue.length} activeWords={activeWords} activePhrases={activePhrases} navigate={navigate} updateState={updateState} onContinue={startContinuousLearning} />;
-    if (view === "word-learn") return <WordLearning items={activeWords} onDone={() => { setCompleted("vocabularyLearn"); navigate("word-quiz"); }} />;
+    if (view === "word-learn") return <WordLearning items={activeWords} correctCounts={state.progress.selfSpellingCorrect} onCorrect={recordSelfSpellingCorrect} onDone={() => { setCompleted("vocabularyLearn"); navigate("word-quiz"); }} />;
     if (view === "phrase-learn") return <PhraseLearning items={activePhrases} onDone={() => { setCompleted("phraseLearn"); navigate("phrase-quiz"); }} />;
     if (view === "review-quiz") return <QuizView key="review-quiz" title="到期错题复查" description="顺序已打乱。只填写英文，不提供首字母或长度提示。" questions={reviewQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "reviews")} onNext={() => navigate(nextLearningView())} nextLabel={nextLearningView() === "word-learn" ? "继续学习新单词" : nextLearningView() === "word-quiz" ? "继续单词拼写" : nextLearningView() === "word-cloze" ? "继续单词例句填空" : nextLearningView() === "phrase-learn" ? "继续学习新词组" : nextLearningView() === "phrase-quiz" ? "继续词组拼写" : "返回今日首页"} />;
     if (view === "word-quiz") return <QuizView key="word-quiz" title="单词无提示拼写" description="整组提交后统一批改；不提示首字母、字母数量或下划线。" questions={wordSpellingQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "vocabularySpelling")} onNext={() => navigate("word-cloze")} nextLabel="开始单词例句填空" />;
     if (view === "word-cloze") return <QuizView key="word-cloze" title="单词例句填空" description="请根据语法和语境填写完整单词。题面使用“已给字母  [还需字母数]”格式。" questions={wordClozeQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "vocabularyCloze")} onNext={() => navigate(activePhrases.length ? "phrase-learn" : "today")} nextLabel={activePhrases.length ? "开始学习词组" : "完成本轮学习"} />;
     if (view === "phrase-quiz") return <QuizView key="phrase-quiz" title="词组无提示拼写" description="必须写出完整搭配；词序、介词和词形都参与判定。提交后即完成本轮学习。" questions={phraseSpellingQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "phraseSpelling")} onNext={() => navigate("today")} nextLabel="完成本轮学习" />;
     if (view === "comprehensive-practice") return <QuizView key={`comprehensive-${comprehensiveStart}`} title={`综合填词练习 · 第 ${comprehensiveStart}—${comprehensiveStart + activeComprehensiveExercises.length - 1} 题`} description="原资料 Part 3：根据句子中已给出的字母和缺失数量，填写完整英文单词。此处进度与每日词组学习分开保存。" questions={comprehensiveExerciseQuestions} date={state.daily.date} online={online} onComplete={handleComprehensiveResults} onNext={() => { setComprehensiveBatchStart(null); navigate("phrases"); }} nextLabel="返回词组库" />;
-    if (view === "words") return <WordLibrary items={vocabulary} learned={state.progress.learnedVocabulary} />;
-    if (view === "phrases") return <PhraseLibrary items={phrases} learned={state.progress.learnedPhrases} exerciseNextIndex={comprehensiveExerciseNextIndex} totalExercises={exercises.length} onStartComprehensive={() => { if (!comprehensiveUnlocked || comprehensiveExerciseNextIndex > exercises.length) return; setComprehensiveBatchStart(comprehensiveExerciseNextIndex); navigate("comprehensive-practice"); }} />;
+    if (view === "words") return <WordLibrary key={`words-${noteJump?.token ?? "normal"}`} items={vocabulary} learned={state.progress.learnedVocabulary} correctCounts={state.progress.selfSpellingCorrect} onCorrect={recordSelfSpellingCorrect} focusItemId={noteJump?.note.sourceKind === "word" ? noteJump.note.itemId : undefined} />;
+    if (view === "phrases") return <PhraseLibrary key={`phrases-${noteJump?.token ?? "normal"}`} items={phrases} learned={state.progress.learnedPhrases} exerciseNextIndex={comprehensiveExerciseNextIndex} totalExercises={exercises.length} focusItemId={noteJump?.note.sourceKind === "phrase" ? noteJump.note.itemId : undefined} onStartComprehensive={() => { if (!comprehensiveUnlocked || comprehensiveExerciseNextIndex > exercises.length) return; setComprehensiveBatchStart(comprehensiveExerciseNextIndex); navigate("comprehensive-practice"); }} />;
     if (view === "errors") return <ErrorBook reviews={state.progress.reviews} wordById={wordById} phraseById={phraseById} exerciseById={exerciseById} />;
     if (view === "progress") return <ProgressPage state={state} totalWords={vocabulary.length} totalPhrases={phrases.length} totalExercises={exercises.length} />;
     return <SettingsPage state={state} setState={setState} install={install} storage={storage} online={online} setToast={setToast} />;
@@ -473,6 +571,7 @@ export default function StudyApp({
         <NavButton active={view === "errors"} onClick={() => navigate("errors")} label="错题" />
         <NavButton active={view === "settings"} onClick={() => navigate("settings")} label="设置" />
       </nav>
+      <NotebookWidget notes={state.notebook.notes} onAdd={addNote} onOpenNote={openNote} />
       {toast && <div className="toast" role="status">{toast}</div>}
     </main>
   );
@@ -480,6 +579,166 @@ export default function StudyApp({
 
 function NavButton({ active, onClick, label, badge }: { active: boolean; onClick(): void; label: string; badge?: string }) {
   return <button className={`nav-item ${active ? "active" : ""}`} onClick={onClick}><span>{label}</span>{badge && <b>{badge}</b>}</button>;
+}
+
+type NoteDraft = Omit<StudyNote, "id" | "body" | "createdAt">;
+
+function NotebookWidget({ notes, onAdd, onOpenNote }: { notes: StudyNote[]; onAdd(note: StudyNote): void; onOpenNote(note: StudyNote): void }) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<NoteDraft | null>(null);
+  const [body, setBody] = useState("");
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const widgetRef = useRef<HTMLElement>(null);
+  const dragRef = useRef<{ pointerId: number; offsetX: number; offsetY: number } | null>(null);
+
+  useEffect(() => {
+    let savedPosition: { x: number; y: number } | null = null;
+    try {
+      const saved = localStorage.getItem(NOTEBOOK_POSITION_KEY);
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as { x?: number; y?: number };
+      if (Number.isFinite(parsed.x) && Number.isFinite(parsed.y)) savedPosition = { x: parsed.x!, y: parsed.y! };
+    } catch {
+      localStorage.removeItem(NOTEBOOK_POSITION_KEY);
+    }
+    if (!savedPosition) return;
+    const timer = window.setTimeout(() => setPosition(savedPosition), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const captureSelection = () => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
+      const range = selection.getRangeAt(0);
+      const startElement = range.startContainer instanceof Element ? range.startContainer : range.startContainer.parentElement;
+      const anchor = startElement?.closest<HTMLElement>("[data-note-anchor]");
+      if (!anchor || !anchor.contains(range.endContainer)) return;
+      const rawQuote = range.toString();
+      const quote = rawQuote.trim();
+      if (!quote) return;
+      const before = range.cloneRange();
+      before.selectNodeContents(anchor);
+      before.setEnd(range.startContainer, range.startOffset);
+      const leadingWhitespace = rawQuote.length - rawQuote.trimStart().length;
+      const startOffset = before.toString().length + leadingWhitespace;
+      const endOffset = startOffset + quote.length;
+      const fullText = anchor.textContent ?? "";
+      const sourceKind = anchor.dataset.noteKind;
+      const itemId = anchor.dataset.noteItem;
+      const field = anchor.dataset.noteField;
+      const label = anchor.dataset.noteLabel;
+      const anchorId = anchor.dataset.noteAnchor;
+      if ((sourceKind !== "word" && sourceKind !== "phrase") || !itemId || !field || !label || !anchorId) return;
+      setDraft({
+        anchorId,
+        sourceKind,
+        itemId,
+        field,
+        label,
+        quote,
+        startOffset,
+        endOffset,
+        prefix: fullText.slice(Math.max(0, startOffset - 28), startOffset),
+        suffix: fullText.slice(endOffset, endOffset + 28),
+      });
+      setBody("");
+      setOpen(true);
+    };
+    const mouseUp = (event: MouseEvent) => {
+      if (widgetRef.current?.contains(event.target as Node)) return;
+      window.setTimeout(captureSelection, 0);
+    };
+    const touchEnd = (event: TouchEvent) => {
+      if (widgetRef.current?.contains(event.target as Node)) return;
+      window.setTimeout(captureSelection, 80);
+    };
+    document.addEventListener("mouseup", mouseUp);
+    document.addEventListener("touchend", touchEnd);
+    return () => {
+      document.removeEventListener("mouseup", mouseUp);
+      document.removeEventListener("touchend", touchEnd);
+    };
+  }, []);
+
+  const beginDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest("button") || !widgetRef.current) return;
+    const bounds = widgetRef.current.getBoundingClientRect();
+    dragRef.current = { pointerId: event.pointerId, offsetX: event.clientX - bounds.left, offsetY: event.clientY - bounds.top };
+    setPosition({ x: bounds.left, y: bounds.top });
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const moveDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId || !widgetRef.current) return;
+    const bounds = widgetRef.current.getBoundingClientRect();
+    setPosition({
+      x: Math.min(Math.max(8, event.clientX - drag.offsetX), Math.max(8, window.innerWidth - bounds.width - 8)),
+      y: Math.min(Math.max(8, event.clientY - drag.offsetY), Math.max(8, window.innerHeight - bounds.height - 8)),
+    });
+  };
+
+  const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (dragRef.current?.pointerId !== event.pointerId) return;
+    dragRef.current = null;
+    if (position) localStorage.setItem(NOTEBOOK_POSITION_KEY, JSON.stringify(position));
+  };
+
+  const clearDraft = () => {
+    setDraft(null);
+    setBody("");
+    window.getSelection()?.removeAllRanges();
+  };
+
+  const saveNote = () => {
+    if (!draft || !body.trim()) return;
+    onAdd({
+      ...draft,
+      id: crypto.randomUUID(),
+      body: body.trim(),
+      createdAt: new Date().toISOString(),
+    });
+    clearDraft();
+  };
+
+  const style = position ? { left: `${position.x}px`, top: `${position.y}px`, right: "auto", bottom: "auto" } : undefined;
+  return (
+    <aside className={`notebook-widget ${open ? "open" : "collapsed"}`} style={style} ref={widgetRef} aria-label="笔记本">
+      {!open ? (
+        <button className="notebook-launcher" onClick={() => setOpen(true)}>笔记 <span>{notes.length}</span></button>
+      ) : (
+        <>
+          <div className="notebook-header" onPointerDown={beginDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}>
+            <div><strong>笔记本</strong><small>拖动这里移动</small></div>
+            <button aria-label="收起笔记本" onClick={() => setOpen(false)}>—</button>
+          </div>
+          <div className="notebook-content">
+            {draft ? (
+              <section className="note-compose">
+                <span>{draft.label}</span>
+                <blockquote>{draft.quote}</blockquote>
+                <label><span>写下注释</span><textarea placeholder="这段内容提醒了我什么？" value={body} onChange={(event) => setBody(event.target.value)} /></label>
+                <div className="notebook-actions"><button className="text-button" onClick={clearDraft}>取消</button><button className="secondary-button" disabled={!body.trim()} onClick={saveNote}>保存注释</button></div>
+              </section>
+            ) : notes.length ? (
+              <div className="notebook-list">
+                {notes.map((note) => (
+                  <button className="notebook-note" key={note.id} onClick={() => { setOpen(false); onOpenNote(note); }}>
+                    <span>{note.label}</span>
+                    <blockquote>{note.quote}</blockquote>
+                    <p>{note.body}</p>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="notebook-empty"><strong>还没有注释</strong><p>在单词或词组资料中选中文字，就能在这里添加注释。</p></div>
+            )}
+          </div>
+        </>
+      )}
+    </aside>
+  );
 }
 
 function pageTitle(view: View): string {
@@ -623,11 +882,12 @@ function Dashboard({
   );
 }
 
-function useWordSelfSpelling(items: VocabularyItem[]) {
+function useWordSelfSpelling(items: VocabularyItem[], onCorrect: (itemId: string) => void) {
   const [spellingId, setSpellingId] = useState<string | null>(null);
   const [spellingAnswer, setSpellingAnswer] = useState("");
   const [spellingResult, setSpellingResult] = useState<"correct" | "wrong" | null>(null);
   const spellingInputRef = useRef<HTMLInputElement>(null);
+  const countedAttemptRef = useRef(false);
   const activePosition = items.findIndex((item) => item.id === spellingId);
 
   useEffect(() => {
@@ -635,12 +895,14 @@ function useWordSelfSpelling(items: VocabularyItem[]) {
   }, [spellingId, spellingResult]);
 
   const restore = () => {
+    countedAttemptRef.current = false;
     setSpellingId(null);
     setSpellingAnswer("");
     setSpellingResult(null);
   };
 
   const start = (itemId: string) => {
+    countedAttemptRef.current = false;
     setSpellingId(itemId);
     setSpellingAnswer("");
     setSpellingResult(null);
@@ -648,10 +910,16 @@ function useWordSelfSpelling(items: VocabularyItem[]) {
 
   const confirm = (item: VocabularyItem) => {
     if (!spellingAnswer.trim() || spellingResult) return;
-    setSpellingResult(normalizedAnswer(spellingAnswer) === normalizedAnswer(item.word) ? "correct" : "wrong");
+    const correct = normalizedAnswer(spellingAnswer) === normalizedAnswer(item.word);
+    setSpellingResult(correct ? "correct" : "wrong");
+    if (correct && !countedAttemptRef.current) {
+      countedAttemptRef.current = true;
+      onCorrect(item.id);
+    }
   };
 
   const retry = () => {
+    countedAttemptRef.current = false;
     setSpellingAnswer("");
     setSpellingResult(null);
   };
@@ -707,8 +975,8 @@ function WordSelfSpellingPanel({ item, spelling }: { item: VocabularyItem; spell
   );
 }
 
-function WordLearning({ items, onDone }: { items: VocabularyItem[]; onDone(): void }) {
-  const spelling = useWordSelfSpelling(items);
+function WordLearning({ items, correctCounts, onCorrect, onDone }: { items: VocabularyItem[]; correctCounts: Record<string, number>; onCorrect(itemId: string): void; onDone(): void }) {
+  const spelling = useWordSelfSpelling(items, onCorrect);
   return (
     <section className="learning-page">
       <div className="section-intro"><span className="pill">新单词 · {items.length} 个</span><h2>先理解，再检查拼写</h2><p>每个词都来自 800 词资料。卡片内可自由拼写且不计错题；正式拼写抽查仍在下一步进行。</p></div>
@@ -734,20 +1002,21 @@ function WordLearning({ items, onDone }: { items: VocabularyItem[]; onDone(): vo
                       if (event.key === "Enter") spelling.confirm(item);
                     }}
                   />
-                ) : <h3>{item.word}</h3>}
+                ) : <h3 {...annotationProps("word", item.id, "word", `${item.word} · 单词`)}>{item.word}</h3>}
                 <span>{item.partOfSpeech}</span>
                 {!active && <button className="spelling-button" onClick={() => spelling.start(item.id)}>拼写</button>}
+                <span className="spelling-count">自行拼对 {correctCounts[item.id] ?? 0} 次</span>
               </div>
               {active ? (
                 <>
-                  <p className="meaning">{item.meaningsZh}</p>
+                  <p className="meaning" {...annotationProps("word", item.id, "meaning", `${item.word} · 中文释义`)}>{item.meaningsZh}</p>
                   <WordSelfSpellingPanel item={item} spelling={spelling} />
                 </>
               ) : (
                 <>
-                  <p className="pronunciation">{item.pronunciation}</p>
-                  <p className="meaning">{item.meaningsZh}</p>
-                  <details><summary>查看释义、记忆和例句</summary><p><strong>英文释义：</strong>{item.definitionEn}</p>{item.mnemonic && <p><strong>记忆：</strong>{item.mnemonic}</p>}<p className="example"><strong>例句：</strong>{item.example}</p></details>
+                  <p className="pronunciation" {...annotationProps("word", item.id, "pronunciation", `${item.word} · 发音`)}>{item.pronunciation}</p>
+                  <p className="meaning" {...annotationProps("word", item.id, "meaning", `${item.word} · 中文释义`)}>{item.meaningsZh}</p>
+                  <details><summary>查看释义、记忆和例句</summary><p {...annotationProps("word", item.id, "definition", `${item.word} · 英文释义`)}><strong>英文释义：</strong>{item.definitionEn}</p>{item.mnemonic && <p {...annotationProps("word", item.id, "mnemonic", `${item.word} · 记忆`)}><strong>记忆：</strong>{item.mnemonic}</p>}<p className="example" {...annotationProps("word", item.id, "example", `${item.word} · 例句`)}><strong>例句：</strong>{item.example}</p></details>
                 </>
               )}
             </article>
@@ -764,7 +1033,7 @@ function PhraseLearning({ items, onDone }: { items: PhraseItem[]; onDone(): void
     <section className="learning-page">
       <div className="section-intro"><span className="pill">新词组 · {items.length} 个</span><h2>记住完整搭配</h2><p>词组学习进度与单词完全分开。介词、词序和词形都会在拼写抽查中检查。</p></div>
       <div className="phrase-study-list">
-        {items.map((item) => <article key={item.id}><span>{item.index}</span><div><h3>{item.phrase}</h3><p>{item.meaningZh}</p></div><small>{item.category}</small></article>)}
+        {items.map((item) => <article key={item.id}><span>{item.index}</span><div><h3 {...annotationProps("phrase", item.id, "phrase", `${item.phrase} · 词组`)}>{item.phrase}</h3><p {...annotationProps("phrase", item.id, "meaning", `${item.phrase} · 中文释义`)}>{item.meaningZh}</p></div><small>{item.category}</small></article>)}
       </div>
       <div className="sticky-action"><div><strong>已经学习完这 {items.length} 个词组？</strong><small>下一步需写出完整英文搭配。</small></div><button className="primary-button" onClick={onDone}>开始整组拼写 →</button></div>
     </section>
@@ -933,10 +1202,15 @@ function WrongExplanation({ result }: { result: GradeResult }) {
   );
 }
 
-function WordLibrary({ items, learned }: { items: VocabularyItem[]; learned: number[] }) {
-  const [query, setQuery] = useState("");
-  const filtered = items.filter((item) => `${item.word} ${item.meaningsZh}`.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 80);
-  const spelling = useWordSelfSpelling(filtered);
+function WordLibrary({ items, learned, correctCounts, onCorrect, focusItemId }: { items: VocabularyItem[]; learned: number[]; correctCounts: Record<string, number>; onCorrect(itemId: string): void; focusItemId?: string }) {
+  const focusItem = focusItemId ? items.find((item) => item.id === focusItemId) : undefined;
+  const [query, setQuery] = useState(focusItem?.word ?? "");
+  const matches = items.filter((item) => `${item.word} ${item.meaningsZh}`.toLowerCase().includes(query.trim().toLowerCase()));
+  const firstMatches = matches.slice(0, 80);
+  const filtered = focusItem && !firstMatches.some((item) => item.id === focusItem.id)
+    ? [focusItem, ...firstMatches.slice(0, 79)]
+    : firstMatches;
+  const spelling = useWordSelfSpelling(filtered, onCorrect);
 
   return (
     <section className="library-page">
@@ -973,11 +1247,12 @@ function WordLibrary({ items, learned }: { items: VocabularyItem[]; learned: num
                         if (event.key === "Enter") spelling.confirm(item);
                       }}
                     />
-                  ) : <strong>{item.word}</strong>}
-                  <small>{item.partOfSpeech} {item.meaningsZh}</small>
+                  ) : <strong {...annotationProps("word", item.id, "word", `${item.word} · 单词`)}>{item.word}</strong>}
+                  <small>{item.partOfSpeech} <span {...annotationProps("word", item.id, "meaning", `${item.word} · 中文释义`)}>{item.meaningsZh}</span></small>
                 </div>
                 <div className="library-card-actions">
                   <i>{learned.includes(item.index) ? "已学" : "未学"}</i>
+                  <span className="spelling-count">拼对 {correctCounts[item.id] ?? 0} 次</span>
                   {!active && <button className="spelling-button" onClick={() => spelling.start(item.id)}>拼写</button>}
                 </div>
               </div>
@@ -985,10 +1260,11 @@ function WordLibrary({ items, learned }: { items: VocabularyItem[]; learned: num
                 <WordSelfSpellingPanel item={item} spelling={spelling} />
               ) : (
                 <details className="library-card-details">
-                  <summary>查看发音、英文释义和例句</summary>
-                  <p>{item.pronunciation}</p>
-                  <p><strong>英文释义：</strong>{item.definitionEn}</p>
-                  <p className="example"><strong>例句：</strong>{item.example}</p>
+                  <summary>查看发音、释义、记忆和例句</summary>
+                  <p {...annotationProps("word", item.id, "pronunciation", `${item.word} · 发音`)}>{item.pronunciation}</p>
+                  <p {...annotationProps("word", item.id, "definition", `${item.word} · 英文释义`)}><strong>英文释义：</strong>{item.definitionEn}</p>
+                  {item.mnemonic && <p {...annotationProps("word", item.id, "mnemonic", `${item.word} · 记忆`)}><strong>记忆：</strong>{item.mnemonic}</p>}
+                  <p className="example" {...annotationProps("word", item.id, "example", `${item.word} · 例句`)}><strong>例句：</strong>{item.example}</p>
                 </details>
               )}
             </article>
@@ -1000,15 +1276,38 @@ function WordLibrary({ items, learned }: { items: VocabularyItem[]; learned: num
   );
 }
 
-function PhraseLibrary({ items, learned, exerciseNextIndex, totalExercises, onStartComprehensive }: { items: PhraseItem[]; learned: number[]; exerciseNextIndex: number; totalExercises: number; onStartComprehensive(): void }) {
-  const [query, setQuery] = useState("");
-  const filtered = items.filter((item) => `${item.phrase} ${item.meaningZh} ${item.category}`.toLowerCase().includes(query.trim().toLowerCase()));
+function PhraseLibrary({ items, learned, exerciseNextIndex, totalExercises, focusItemId, onStartComprehensive }: { items: PhraseItem[]; learned: number[]; exerciseNextIndex: number; totalExercises: number; focusItemId?: string; onStartComprehensive(): void }) {
+  const focusItem = focusItemId ? items.find((item) => item.id === focusItemId) : undefined;
+  const [query, setQuery] = useState(focusItem?.phrase ?? "");
+  const matches = items.filter((item) => `${item.phrase} ${item.meaningZh} ${item.category}`.toLowerCase().includes(query.trim().toLowerCase()));
+  const filtered = focusItem && !matches.some((item) => item.id === focusItem.id) ? [focusItem, ...matches] : matches;
   const unlocked = learned.length >= items.length;
   const completedExercises = Math.min(totalExercises, Math.max(0, exerciseNextIndex - 1));
   const complete = completedExercises >= totalExercises;
   const progressValue = unlocked ? completedExercises : learned.length;
   const progressTotal = unlocked ? totalExercises : items.length;
-  return <section className="library-page"><div className="section-intro"><span className="pill">独立题库 · 100 组</span><h2>自由查看词组资料</h2><p>词组始终与单词分开记录，即使搭配中包含同一个英文单词。</p></div><section className={`panel comprehensive-panel ${unlocked ? "" : "locked"}`}><div className="comprehensive-copy"><span className="eyebrow">原资料 Part 3 · 100 题</span><h3>综合填词练习</h3><p>{unlocked ? "每日词组学习已全部完成。现在可以按原题顺序练习补全缺失字母，每次 10 题，进度单独保存。" : "完成全部 100 个词组的每日学习后解锁。它不再属于每日词组流程，也不会影响每日完成状态。"}</p></div><div className="comprehensive-status"><strong>{progressValue}<small> / {progressTotal}</small></strong><span>{unlocked ? complete ? "全部完成" : "综合题进度" : "词组解锁进度"}</span><div className="bar"><i style={{ width: `${Math.round((progressValue / progressTotal) * 100)}%` }} /></div><button className="secondary-button" disabled={!unlocked || complete} onClick={onStartComprehensive}>{complete ? "已完成 100 题" : unlocked ? "继续综合填词" : "完成词组后解锁"}</button></div></section><input className="search-input" placeholder="搜索词组或中文释义" value={query} onChange={(event) => setQuery(event.target.value)} /><div className="phrase-library">{filtered.map((item) => <article key={item.id}><span>{item.index}</span><div><strong>{item.phrase}</strong><small>{item.meaningZh}</small></div><i>{learned.includes(item.index) ? "已学" : item.category}</i></article>)}</div></section>;
+  return (
+    <section className="library-page">
+      <div className="section-intro"><span className="pill">独立题库 · 100 组</span><h2>自由查看词组资料</h2><p>词组始终与单词分开记录，即使搭配中包含同一个英文单词。</p></div>
+      <section className={`panel comprehensive-panel ${unlocked ? "" : "locked"}`}>
+        <div className="comprehensive-copy"><span className="eyebrow">原资料 Part 3 · 100 题</span><h3>综合填词练习</h3><p>{unlocked ? "每日词组学习已全部完成。现在可以按原题顺序练习补全缺失字母，每次 10 题，进度单独保存。" : "完成全部 100 个词组的每日学习后解锁。它不再属于每日词组流程，也不会影响每日完成状态。"}</p></div>
+        <div className="comprehensive-status"><strong>{progressValue}<small> / {progressTotal}</small></strong><span>{unlocked ? complete ? "全部完成" : "综合题进度" : "词组解锁进度"}</span><div className="bar"><i style={{ width: `${Math.round((progressValue / progressTotal) * 100)}%` }} /></div><button className="secondary-button" disabled={!unlocked || complete} onClick={onStartComprehensive}>{complete ? "已完成 100 题" : unlocked ? "继续综合填词" : "完成词组后解锁"}</button></div>
+      </section>
+      <input className="search-input" placeholder="搜索词组或中文释义" value={query} onChange={(event) => setQuery(event.target.value)} />
+      <div className="phrase-library">
+        {filtered.map((item) => (
+          <article key={item.id}>
+            <span>{item.index}</span>
+            <div>
+              <strong {...annotationProps("phrase", item.id, "phrase", `${item.phrase} · 词组`)}>{item.phrase}</strong>
+              <small {...annotationProps("phrase", item.id, "meaning", `${item.phrase} · 中文释义`)}>{item.meaningZh}</small>
+            </div>
+            <i>{learned.includes(item.index) ? "已学" : item.category}</i>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 function ErrorBook({ reviews, wordById, phraseById, exerciseById }: { reviews: ReviewItem[]; wordById: Map<string, VocabularyItem>; phraseById: Map<string, PhraseItem>; exerciseById: Map<string, ExerciseItem> }) {

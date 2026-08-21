@@ -47,6 +47,22 @@ export type ReviewItem = {
   lastWrongAnswer?: string;
 };
 
+export type StudyNote = {
+  id: string;
+  anchorId: string;
+  sourceKind: "word" | "phrase";
+  itemId: string;
+  field: string;
+  label: string;
+  quote: string;
+  startOffset: number;
+  endOffset: number;
+  prefix: string;
+  suffix: string;
+  body: string;
+  createdAt: string;
+};
+
 export type StudyState = {
   version: 1;
   initializedAt: string;
@@ -65,6 +81,10 @@ export type StudyState = {
     learnedVocabulary: number[];
     learnedPhrases: number[];
     reviews: ReviewItem[];
+    selfSpellingCorrect: Record<string, number>;
+  };
+  notebook: {
+    notes: StudyNote[];
   };
   daily: {
     date: string;

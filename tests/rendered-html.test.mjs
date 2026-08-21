@@ -103,15 +103,53 @@ test("word cards offer retry-gated isolated self-practice spelling", async () =>
   assert.doesNotMatch(wordLibrary, /\/api\/grade|setState|handleResults/);
 });
 
-test("service worker refreshes deployed assets before using its offline cache", async () => {
-  const [serviceWorker, source] = await Promise.all([
+test("persists a per-word count only after self-practice is correct", async () => {
+  const [source, types, state] = await Promise.all([
+    readFile(new URL("../app/StudyApp.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/study-types.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/study-state.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(types, /selfSpellingCorrect: Record<string, number>/);
+  assert.match(state, /selfSpellingCorrect: \{\}/);
+  assert.match(source, /if \(correct && !countedAttemptRef\.current\)/);
+  assert.match(source, /\[itemId\]: \(current\.progress\.selfSpellingCorrect\[itemId\] \?\? 0\) \+ 1/);
+  assert.match(source, /自行拼对 \{correctCounts\[item\.id\] \?\? 0\} 次/);
+  assert.match(source, /拼对 \{correctCounts\[item\.id\] \?\? 0\} 次/);
+});
+
+test("notebook stores anchored selections and reopens their canonical source", async () => {
+  const [source, types, state, styles] = await Promise.all([
+    readFile(new URL("../app/StudyApp.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/study-types.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/study-state.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(types, /export type StudyNote/);
+  assert.match(types, /startOffset: number/);
+  assert.match(state, /notebook: \{ notes: \[\] \}/);
+  assert.match(source, /function NotebookWidget/);
+  assert.match(source, /data-note-anchor/);
+  assert.match(source, /scrollIntoView/);
+  assert.match(source, /selectNoteRange/);
+  assert.match(source, /保存注释/);
+  assert.match(styles, /\.notebook-widget/);
+  assert.match(styles, /cursor:move/);
+});
+
+test("service worker stays idle when the app is closed and never controls local development", async () => {
+  const [serviceWorker, source, viteConfig] = await Promise.all([
     readFile(new URL("../public/sw.js", import.meta.url), "utf8"),
     readFile(new URL("../app/StudyApp.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../vite.config.ts", import.meta.url), "utf8"),
   ]);
-  assert.match(serviceWorker, /toefl-study-shell-v5/);
+  assert.match(serviceWorker, /toefl-study-shell-v6/);
   assert.match(serviceWorker, /fetch\(request\)[\s\S]*catch\(\(\) => caches\.match\(request\)\)/);
+  assert.doesNotMatch(serviceWorker, /addEventListener\(["'](?:sync|periodicsync|push)["']/);
+  assert.match(source, /if \(import\.meta\.env\.PROD\)/);
+  assert.match(source, /getRegistrations\(\)/);
   assert.match(source, /updateViaCache: "none"/);
   assert.match(source, /controllerchange/);
+  assert.match(viteConfig, /forwardConsole: false/);
 });
 
 test("repairs a fully completed legacy batch that was never finalized", async () => {

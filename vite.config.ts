@@ -44,9 +44,15 @@ export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
-    server: isCodexSeatbeltSandbox
-      ? { watch: { useFsEvents: false, usePolling: true } }
-      : undefined,
+    server: {
+      // Browser console forwarding can recurse when a cached development page
+      // reconnects after Vite has stopped. Keep local errors in the browser and
+      // let the app render instead of covering it with a repeated error overlay.
+      forwardConsole: false,
+      ...(isCodexSeatbeltSandbox
+        ? { watch: { useFsEvents: false, usePolling: true } }
+        : {}),
+    },
     plugins: [
       vinext(),
       sites(),
