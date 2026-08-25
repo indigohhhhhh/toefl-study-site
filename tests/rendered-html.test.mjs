@@ -25,7 +25,7 @@ function context() {
 
 test("server-renders the real TOEFL learning dashboard", async () => {
   const app = await worker();
-  const response = await app.fetch(new Request("http://localhost/", { headers: { accept: "text/html" } }), environment(), context());
+  const response = await app.fetch(new Request("http://localhost/", { headers: { accept: "text/html", host: "localhost" } }), environment(), context());
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
@@ -163,4 +163,28 @@ test("repairs a fully completed legacy batch that was never finalized", async ()
   assert.match(source, /phraseTasksDone/);
   assert.match(source, /if \(current\.daily\.submitted\) return current/);
   assert.match(source, /daily: \{ \.\.\.current\.daily, submitted: true, continuousLearning: false \}/);
+});
+
+test("uses app-owned password auth without ChatGPT identity headers", async () => {
+  const [page, auth, stateRoute, gradeRoute, loginRoute, setupRoute] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/password-auth.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/state/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/grade/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/auth/login/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/auth/setup/route.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(page, /currentPasswordSession/);
+  assert.match(page, /PasswordGate/);
+  assert.doesNotMatch(page, /ChatGPT|oai-authenticated-user/);
+  assert.match(auth, /PBKDF2/);
+  assert.match(auth, /httpOnly: true/);
+  assert.match(auth, /secure: true/);
+  assert.match(auth, /sameSite: "lax"/);
+  assert.match(auth, /SINGLE_USER_ID = "password-owner"/);
+  assert.match(auth, /orderBy\(desc\(userStates\.updatedAt\)\)/);
+  assert.match(stateRoute, /await requestUserId\(request\)/);
+  assert.match(gradeRoute, /await requestUserId\(request\)/);
+  assert.match(loginRoute, /loginIsBlocked/);
+  assert.match(setupRoute, /verifySetupToken/);
 });

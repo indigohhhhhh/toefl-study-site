@@ -77,7 +77,7 @@ function gradeOne(id: string, kind: QuizKind, answer: string): GradeResult {
 
 export async function POST(request: Request) {
   try {
-    const userId = requestUserId(request);
+    const userId = await requestUserId(request);
     const payload = (await request.json()) as Submission;
     if (!payload.sessionId || !Array.isArray(payload.items) || payload.items.length === 0 || payload.items.length > 50) {
       return Response.json({ error: "提交内容不完整" }, { status: 400 });

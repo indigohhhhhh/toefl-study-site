@@ -10,7 +10,7 @@ function authError(error: unknown) {
 
 export async function GET(request: Request) {
   try {
-    const userId = requestUserId(request);
+    const userId = await requestUserId(request);
     const [row] = await getDb().select().from(userStates).where(eq(userStates.userId, userId)).limit(1);
     return Response.json({ state: row ? JSON.parse(row.stateJson) : null, storage: "cloud" });
   } catch (error) {
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const userId = requestUserId(request);
+    const userId = await requestUserId(request);
     const raw = await request.text();
     if (raw.length > 2_000_000) return Response.json({ error: "备份记录过大" }, { status: 413 });
     const payload = JSON.parse(raw) as { state?: StudyState };

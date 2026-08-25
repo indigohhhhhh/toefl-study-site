@@ -565,7 +565,7 @@ export default function StudyApp({
       <section className="workspace">
         <header className="topbar">
           <div><span className="eyebrow">{todayLabel(state.daily.date)} · 北京时间</span><h1>{view === "today" ? "今天，稳稳向前一步。" : pageTitle(view)}</h1></div>
-          <div className="account-area"><span className={`sync-badge ${online ? "" : "offline"}`}>{!online ? "离线草稿" : storage === "cloud" ? "云端已连接" : "本机预览"}</span><button className="profile" aria-label="账户菜单">{displayName.slice(0, 2).toUpperCase()}</button></div>
+          <div className="account-area"><span className={`sync-badge ${online ? "" : "offline"}`}>{!online ? "离线草稿" : storage === "cloud" ? "云端已连接" : "本机预览"}</span><button className="profile" aria-label="退出登录" title="退出登录" onClick={() => { void fetch("/api/auth/logout", { method: "POST" }).finally(() => window.location.replace("/")); }}>{displayName.slice(0, 2).toUpperCase()}</button></div>
         </header>
         {!ready && <div className="loading-line">正在读取学习进度…</div>}
         {page}
