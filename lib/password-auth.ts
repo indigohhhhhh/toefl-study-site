@@ -9,7 +9,8 @@ export const SINGLE_USER_ID = "password-owner";
 export const SITE_AUTH_ID = "primary";
 
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
-const PASSWORD_ITERATIONS = 180_000;
+// Cloudflare Workers caps PBKDF2 at 100,000 iterations.
+const PASSWORD_ITERATIONS = 100_000;
 const RATE_WINDOW_MS = 15 * 60 * 1000;
 const MAX_FAILED_ATTEMPTS = 5;
 
