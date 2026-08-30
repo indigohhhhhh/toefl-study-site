@@ -24,7 +24,8 @@ export async function POST(request: Request) {
     await clearFailedLogins(request);
     await issueSessionCookie();
     return Response.json({ ok: true });
-  } catch {
+  } catch (error) {
+    console.error("Password login failed", error instanceof Error ? error.message : error);
     return Response.json({ error: "登录服务暂时不可用" }, { status: 503 });
   }
 }

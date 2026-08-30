@@ -18,7 +18,8 @@ export async function POST(request: Request) {
     }
     await issueSessionCookie();
     return Response.json({ ok: true });
-  } catch {
+  } catch (error) {
+    console.error("Password setup failed", error instanceof Error ? error.message : error);
     return Response.json({ error: "暂时无法保存密码，请稍后重试" }, { status: 503 });
   }
 }
