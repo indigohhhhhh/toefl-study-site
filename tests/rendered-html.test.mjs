@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { normalizedAnswer } from "../lib/grading.js";
+import { matchesSelfSpelling, normalizedAnswer } from "../lib/grading.js";
+import { GradingResponseError, readGradeResults } from "../lib/grade-response.js";
 
 let workerPromise;
 
@@ -36,6 +37,63 @@ test("server-renders the real TOEFL learning dashboard", async () => {
   assert.doesNotMatch(html, /词组配套练习/);
   assert.match(html, /manifest\.webmanifest/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
+});
+
+test("grades a complete 14-question batch and returns JSON on rejected requests", async () => {
+  const app = await worker();
+  const words = JSON.parse(await readFile(new URL("../data/vocabulary.json", import.meta.url), "utf8"));
+  const items = words.slice(0, 14).map((word) => ({ id: word.id, kind: "word_spelling", answer: word.word }));
+  items[0].answer = "not-the-answer";
+  const request = (host, body) => new Request(`https://${host}/api/grade`, { method: "POST", headers: { "content-type": "application/json" }, body });
+  const response = await app.fetch(request("localhost", JSON.stringify({ sessionId: "test-14-questions", items })), environment(), context());
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  const results = await readGradeResults(response, items);
+  assert.equal(results.length, 14);
+  assert.equal(results.filter((result) => result.correct).length, 13);
+  assert.equal(results[0].expected, words[0].word);
+
+  const unauthorized = await app.fetch(request("example.com", JSON.stringify({ sessionId: "test", items })), environment(), context());
+  assert.equal(unauthorized.status, 401);
+  assert.match(unauthorized.headers.get("content-type"), /application\/json/);
+  assert.equal((await unauthorized.json()).code, "AUTH_REQUIRED");
+
+  const invalid = await app.fetch(request("localhost", "not json"), environment(), context());
+  assert.equal(invalid.status, 400);
+  assert.equal((await invalid.json()).error, "提交格式不正确");
+});
+
+test("HTML, login pages, and malformed grades never become successful submissions", async () => {
+  const submitted = [{ id: "word-001", kind: "word_spelling" }];
+  for (const status of [200, 502]) {
+    await assert.rejects(readGradeResults(new Response("<!DOCTYPE html><html>Error</html>", { status, headers: { "content-type": "text/html" } }), submitted), (error) => {
+      assert.ok(error instanceof GradingResponseError);
+      assert.match(error.message, /答案草稿已保留/);
+      assert.doesNotMatch(error.message, /Unexpected token|DOCTYPE/);
+      return true;
+    });
+  }
+  await assert.rejects(readGradeResults(new Response("<!DOCTYPE html><html>Login</html>", { status: 401, headers: { "content-type": "text/html" } }), submitted), (error) => error instanceof GradingResponseError && error.needsLogin);
+  await assert.rejects(readGradeResults(new Response("<!DOCTYPE html><html>Blocked</html>", { status: 403, headers: { "content-type": "text/html", "cf-ray": "test-ray-123" } }), submitted), (error) => {
+    assert.ok(error instanceof GradingResponseError);
+    assert.equal(error.needsLogin, false);
+    assert.match(error.message, /安全防护拦截/);
+    assert.match(error.message, /test-ray-123/);
+    return true;
+  });
+  await assert.rejects(readGradeResults(new Response("{", { headers: { "content-type": "application/json" } }), submitted), /没有完整接收/);
+  await assert.rejects(readGradeResults(Response.json({ results: [] }), submitted), /与本组题目不一致/);
+});
+
+test("submission errors preserve drafts and provide a safe login recovery action", async () => {
+  const source = await readFile(new URL("../app/StudyApp.tsx", import.meta.url), "utf8");
+  assert.match(source, /readGradeResults\(response, quizQuestions\)/);
+  assert.match(source, /redirect: "manual"/);
+  assert.match(source, /credentials: "same-origin"/);
+  assert.match(source, /controller\.abort\(\)/);
+  assert.match(source, /刷新并重新登录/);
+  assert.match(source, /setResults\(gradedResults\);\s*localStorage\.removeItem\(draftKey\)/);
+  assert.doesNotMatch(source, /const payload = await response\.json\(\) as \{ results/);
 });
 
 test("contains the complete fixed question banks", async () => {
@@ -93,7 +151,7 @@ test("word cards offer retry-gated isolated self-practice spelling", async () =>
   const wordLibrary = source.slice(source.indexOf("function WordLibrary"), source.indexOf("function PhraseLibrary"));
   const wordLearning = source.slice(source.indexOf("function WordLearning"), source.indexOf("function PhraseLearning"));
   assert.match(wordLibrary, /自由拼写也不会计入错题或正式进度/);
-  assert.match(source, /normalizedAnswer\(spellingAnswer\) === normalizedAnswer\(item\.word\)/);
+  assert.match(source, /matchesSelfSpelling\(spellingAnswer, "word" in item \? \[item\.word\] : item\.acceptedAnswers\)/);
   assert.match(wordLearning, /spelling\.start\(item\.id\)/);
   assert.match(source, /spelling\.result === "wrong"/);
   assert.match(source, /重新拼写/);
@@ -101,6 +159,37 @@ test("word cards offer retry-gated isolated self-practice spelling", async () =>
   assert.match(source, /还原/);
   assert.match(source, /正确拼写/);
   assert.doesNotMatch(wordLibrary, /\/api\/grade|setState|handleResults/);
+});
+
+test("phrase self-spelling checks complete phrases and rejects missing or wrong prepositions", async () => {
+  assert.equal(matchesSelfSpelling(" RESPOND   TO ", ["Respond to"]), true);
+  assert.equal(matchesSelfSpelling("respond", ["Respond to"]), false);
+  assert.equal(matchesSelfSpelling("respond for", ["Respond to"]), false);
+  assert.equal(matchesSelfSpelling("to respond", ["Respond to"]), false);
+  assert.equal(matchesSelfSpelling("responds to", ["Respond to"]), false);
+  assert.equal(matchesSelfSpelling("", ["Respond to"]), false);
+  const phrases = JSON.parse(await readFile(new URL("../data/phrases.json", import.meta.url), "utf8"));
+  assert.ok(phrases.every((item) => matchesSelfSpelling(item.phrase, item.acceptedAnswers)));
+  const words = JSON.parse(await readFile(new URL("../data/vocabulary.json", import.meta.url), "utf8"));
+  const wordIds = new Set(words.map((item) => item.id));
+  assert.ok(phrases.every((item) => !wordIds.has(item.id)), "phrase spelling counts must not collide with word counts");
+});
+
+test("phrase study and library share isolated retry-gated spelling cards", async () => {
+  const source = await readFile(new URL("../app/StudyApp.tsx", import.meta.url), "utf8");
+  const card = source.slice(source.indexOf("function PhraseCard"), source.indexOf("function PhraseLearning"));
+  const learning = source.slice(source.indexOf("function PhraseLearning"), source.indexOf("function QuizView"));
+  const library = source.slice(source.indexOf("function PhraseLibrary"), source.indexOf("function ErrorBook"));
+  assert.match(card, /spelling\.start\(item\.id\)/);
+  assert.match(card, /placeholder="请输入完整词组"/);
+  assert.match(card, /<SelfSpellingPanel/);
+  assert.match(card, /拼对 \{correctCount\} 次/);
+  assert.match(learning, /<PhraseCard/);
+  assert.match(library, /<PhraseCard/);
+  assert.match(library, /spelling\.restore\(\)/);
+  assert.match(source, /if \(spellingResult !== "correct"\) return/);
+  assert.match(source, /下一个词组/);
+  assert.doesNotMatch(card + library, /\/api\/grade|handleResults|setCompleted/);
 });
 
 test("persists a per-word count only after self-practice is correct", async () => {
@@ -135,9 +224,16 @@ test("notebook stores anchored selections and reopens their canonical source", a
   assert.match(source, /scrollIntoView/);
   assert.match(source, /selectNoteRange/);
   assert.match(source, /保存注释/);
+  assert.match(source, /selectionchange/);
+  assert.match(source, /添加选中内容/);
+  assert.match(source, /selection-note-chip/);
+  assert.match(source, /question\.note \? annotationProps/);
+  assert.match(source, /field: "meaning"/);
+  assert.match(source, /field: "example"/);
   assert.match(source, /className="notebook-launcher"[\s\S]*onPointerDown=\{beginDrag\}/);
   assert.match(source, /dragMovedRef/);
   assert.match(styles, /\.notebook-widget/);
+  assert.match(styles, /\.selection-note-chip/);
   assert.match(styles, /cursor:move/);
 });
 

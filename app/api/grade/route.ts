@@ -16,6 +16,10 @@ const exercisesById = new Map(exercises.map((item) => [item.id, item]));
 
 type Submission = { sessionId?: string; items?: Array<{ id?: string; kind?: QuizKind; answer?: string }> };
 
+function jsonResponse(body: unknown, status = 200) {
+  return Response.json(body, { status, headers: { "cache-control": "no-store" } });
+}
+
 function gradeOne(id: string, kind: QuizKind, answer: string): GradeResult {
   if (kind === "word_spelling" || kind === "word_cloze") {
     const item = wordsById.get(id);
@@ -79,14 +83,14 @@ export async function POST(request: Request) {
   try {
     const userId = await requestUserId(request);
     const payload = (await request.json()) as Submission;
-    if (!payload.sessionId || !Array.isArray(payload.items) || payload.items.length === 0 || payload.items.length > 50) {
-      return Response.json({ error: "提交内容不完整" }, { status: 400 });
+    if (!payload || typeof payload.sessionId !== "string" || !payload.sessionId || !Array.isArray(payload.items) || payload.items.length === 0 || payload.items.length > 50) {
+      return jsonResponse({ error: "提交内容不完整" }, 400);
     }
     const results = payload.items.map((submitted) => {
-      if (!submitted.id || !submitted.kind || typeof submitted.answer !== "string") {
+      if (!submitted || typeof submitted.id !== "string" || !submitted.id || !["word_spelling", "word_cloze", "phrase_spelling", "phrase_exercise"].includes(submitted.kind ?? "") || typeof submitted.answer !== "string") {
         throw new Error("INVALID_ITEM");
       }
-      return gradeOne(submitted.id, submitted.kind, submitted.answer);
+      return gradeOne(submitted.id, submitted.kind!, submitted.answer);
     });
 
     const now = new Date().toISOString();
@@ -109,17 +113,21 @@ export async function POST(request: Request) {
       // Local previews can grade without a migrated D1 database. Production saves attempts.
     }
 
-    return Response.json({
+    return jsonResponse({
       results,
       summary: { total: results.length, correct: results.filter((item) => item.correct).length },
     });
   } catch (error) {
     if (error instanceof Error && error.message === "AUTH_REQUIRED") {
-      return Response.json({ error: "请先登录" }, { status: 401 });
+      return jsonResponse({ error: "请先登录", code: "AUTH_REQUIRED" }, 401);
     }
-    const message = error instanceof Error && error.message.startsWith("UNKNOWN_ITEM")
-      ? "题目不存在或资料版本不一致"
-      : "提交格式不正确";
-    return Response.json({ error: message }, { status: 400 });
+    if (error instanceof SyntaxError || (error instanceof Error && error.message === "INVALID_ITEM")) {
+      return jsonResponse({ error: "提交格式不正确" }, 400);
+    }
+    if (error instanceof Error && error.message.startsWith("UNKNOWN_ITEM")) {
+      return jsonResponse({ error: "题目不存在或资料版本不一致" }, 400);
+    }
+    console.error("Grading request failed", error instanceof Error ? error.message : error);
+    return jsonResponse({ error: "评分服务暂时不可用，请稍后重试" }, 503);
   }
 }
