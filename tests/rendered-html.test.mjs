@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { matchesSelfSpelling, normalizedAnswer } from "../lib/grading.js";
 import { GradingResponseError, readGradeResults } from "../lib/grade-response.js";
+import { advanceSpellingSession, editSpellingAnswer, firstSpellingAnswers, handleSpellingEnter, restoreSpellingSession } from "../lib/spelling-session.js";
 
 let workerPromise;
 
@@ -92,7 +93,7 @@ test("submission errors preserve drafts and provide a safe login recovery action
   assert.match(source, /credentials: "same-origin"/);
   assert.match(source, /controller\.abort\(\)/);
   assert.match(source, /刷新并重新登录/);
-  assert.match(source, /setResults\(gradedResults\);\s*localStorage\.removeItem\(draftKey\)/);
+  assert.match(source, /setResults\(gradedResults\);[\s\S]{0,160}localStorage\.removeItem\(draftKey\)/);
   assert.doesNotMatch(source, /const payload = await response\.json\(\) as \{ results/);
 });
 
@@ -190,6 +191,63 @@ test("phrase study and library share isolated retry-gated spelling cards", async
   assert.match(source, /if \(spellingResult !== "correct"\) return/);
   assert.match(source, /下一个词组/);
   assert.doesNotMatch(card + library, /\/api\/grade|handleResults|setCompleted/);
+});
+
+test("Enter drives confirm, retry, and next without changing the first recorded answer", () => {
+  const questions = [
+    { id: "word-1", kind: "word_spelling", acceptedAnswers: ["climate"] },
+    { id: "phrase-1", kind: "phrase_spelling", acceptedAnswers: ["Respond to"] },
+  ];
+  let session = restoreSpellingSession(questions, null, {});
+  session = editSpellingAnswer(session, questions, "climat");
+  session = advanceSpellingSession(session, questions);
+  assert.equal(session.entries["word_spelling:word-1"].feedback, "wrong");
+  assert.equal(session.entries["word_spelling:word-1"].firstAnswer, "climat");
+  session = advanceSpellingSession(session, questions);
+  assert.equal(session.entries["word_spelling:word-1"].answer, "");
+  session = editSpellingAnswer(session, questions, "climate");
+  session = advanceSpellingSession(session, questions);
+  assert.equal(session.entries["word_spelling:word-1"].feedback, "correct");
+  session = advanceSpellingSession(session, questions);
+  assert.equal(session.index, 1);
+  session = editSpellingAnswer(session, questions, "respond");
+  session = advanceSpellingSession(session, questions);
+  assert.equal(session.entries["phrase_spelling:phrase-1"].feedback, "wrong");
+  session = advanceSpellingSession(session, questions);
+  session = editSpellingAnswer(session, questions, "RESPOND   TO");
+  session = advanceSpellingSession(session, questions);
+  assert.equal(session.entries["phrase_spelling:phrase-1"].feedback, "correct");
+  session = advanceSpellingSession(session, questions);
+  assert.equal(session.index, questions.length, "the phrase test cannot finish before its correction is right");
+  assert.deepEqual(firstSpellingAnswers(session, questions), {
+    "word_spelling:word-1": "climat",
+    "phrase_spelling:phrase-1": "respond",
+  });
+});
+
+test("Enter handler ignores composition, held keys, and modified shortcuts", () => {
+  let calls = 0;
+  let prevented = 0;
+  const event = (overrides = {}) => ({
+    key: "Enter", preventDefault: () => prevented++, repeat: false,
+    ctrlKey: false, altKey: false, metaKey: false, shiftKey: false,
+    isComposing: false, nativeEvent: { isComposing: false }, keyCode: 13, ...overrides,
+  });
+  handleSpellingEnter(event(), () => calls++);
+  handleSpellingEnter(event({ repeat: true }), () => calls++);
+  handleSpellingEnter(event({ nativeEvent: { isComposing: true } }), () => calls++);
+  handleSpellingEnter(event({ shiftKey: true }), () => calls++);
+  assert.equal(calls, 1);
+  assert.equal(prevented, 2);
+});
+
+test("formal word and phrase spelling tests use the same gated Enter flow", async () => {
+  const source = await readFile(new URL("../app/StudyApp.tsx", import.meta.url), "utf8");
+  assert.match(source, /advanceSpellingSession\(sequence, quizQuestions\)/);
+  assert.match(source, /item\.kind === "word_spelling" \|\| item\.kind === "phrase_spelling"/);
+  assert.match(source, /整组全部订正正确后保存首次成绩/);
+  assert.match(source, /有 \$\{results\.length - correctCount\} 题首次答错，现已全部订正；每题只记 1 次错误/);
+  assert.match(source, /firstSpellingAnswers\(nextSequence, quizQuestions\)/);
 });
 
 test("persists a per-word count only after self-practice is correct", async () => {

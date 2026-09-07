@@ -177,6 +177,10 @@ h1 { margin:8px 0 0; font-size:clamp(27px,3vw,40px); letter-spacing:-.04em; }
 .correction-box .correction-message { grid-column:1 / -1; margin:0; font-size:13px; line-height:1.6; }
 .correction-message.wrong { color:#8d3d25; }
 .correction-message.correct { color:#176a51; }
+.stepwise-feedback { min-height:28px; margin-top:12px; }
+.stepwise-feedback p { margin:0; color:var(--muted); font-size:13px; line-height:1.65; }
+.stepwise-feedback .spelling-feedback.correct { color:var(--green); }
+.stepwise-feedback .spelling-feedback.wrong { color:#8d3d25; }
 .search-input { max-width:560px; margin-bottom:20px; }
 .library-grid { display:grid; gap:10px; }
 .library-card { background:white; border:1px solid var(--line); border-radius:15px; padding:0 18px; }

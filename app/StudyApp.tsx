@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GradingResponseError, readGradeResults } from "@/lib/grade-response";
 import { matchesSelfSpelling } from "@/lib/grading";
+import { advanceSpellingSession, editSpellingAnswer, firstSpellingAnswers, handleSpellingEnter, restoreSpellingSession, spellingAction } from "@/lib/spelling-session";
 import { beijingDate, dueReviews, normalizedAnswer, rollStateToToday } from "@/lib/study-state";
 import type {
   ExerciseItem,
@@ -36,6 +37,7 @@ type QuizQuestion = {
   number: number;
   prompt: string;
   label: string;
+  acceptedAnswers?: string[];
   note?: {
     sourceKind: StudyNote["sourceKind"];
     itemId: string;
@@ -485,6 +487,7 @@ export default function StudyApp({
     number: item.index,
     prompt: `${item.meaningsZh}（${item.partOfSpeech || "单词"}）`,
     label: "请拼写：",
+    acceptedAnswers: [item.word],
     note: { sourceKind: "word" as const, itemId: item.id, field: "meaning", label: `${item.word} · 中文释义` },
   })), `${state.daily.date}:word-spelling`), [activeWords, state.daily.date]);
 
@@ -503,6 +506,7 @@ export default function StudyApp({
     number: item.index,
     prompt: `${item.meaningZh}（${item.category}）`,
     label: "请拼写完整搭配：",
+    acceptedAnswers: item.acceptedAnswers,
     note: { sourceKind: "phrase" as const, itemId: item.id, field: "meaning", label: `${item.phrase} · 中文释义` },
   })), `${state.daily.date}:phrase-spelling`), [activePhrases, state.daily.date]);
 
@@ -553,9 +557,9 @@ export default function StudyApp({
     if (view === "word-learn") return <WordLearning items={activeWords} correctCounts={state.progress.selfSpellingCorrect} onCorrect={recordSelfSpellingCorrect} onDone={() => { setCompleted("vocabularyLearn"); navigate("word-quiz"); }} />;
     if (view === "phrase-learn") return <PhraseLearning items={activePhrases} correctCounts={state.progress.selfSpellingCorrect} onCorrect={recordSelfSpellingCorrect} onDone={() => { setCompleted("phraseLearn"); navigate("phrase-quiz"); }} />;
     if (view === "review-quiz") return <QuizView key="review-quiz" title="到期错题复查" description="顺序已打乱。只填写英文，不提供首字母或长度提示。" questions={reviewQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "reviews")} onNext={() => navigate(nextLearningView())} nextLabel={nextLearningView() === "word-learn" ? "继续学习新单词" : nextLearningView() === "word-quiz" ? "继续单词拼写" : nextLearningView() === "word-cloze" ? "继续单词例句填空" : nextLearningView() === "phrase-learn" ? "继续学习新词组" : nextLearningView() === "phrase-quiz" ? "继续词组拼写" : "返回今日首页"} />;
-    if (view === "word-quiz") return <QuizView key="word-quiz" title="单词无提示拼写" description="整组提交后统一批改；不提示首字母、字母数量或下划线。" questions={wordSpellingQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "vocabularySpelling")} onNext={() => navigate("word-cloze")} nextLabel="开始单词例句填空" />;
+    if (view === "word-quiz") return <QuizView key="word-quiz" title="单词无提示拼写" description="回车确认答案；答对后再回车进入下一题，答错后再回车重新拼写。整组完成后保存首次成绩。" questions={wordSpellingQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "vocabularySpelling")} onNext={() => navigate("word-cloze")} nextLabel="开始单词例句填空" />;
     if (view === "word-cloze") return <QuizView key="word-cloze" title="单词例句填空" description="请根据语法和语境填写完整单词。题面使用“已给字母  [还需字母数]”格式。" questions={wordClozeQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "vocabularyCloze")} onNext={() => navigate(activePhrases.length ? "phrase-learn" : "today")} nextLabel={activePhrases.length ? "开始学习词组" : "完成本轮学习"} />;
-    if (view === "phrase-quiz") return <QuizView key="phrase-quiz" title="词组无提示拼写" description="必须写出完整搭配；词序、介词和词形都参与判定。提交后即完成本轮学习。" questions={phraseSpellingQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "phraseSpelling")} onNext={() => navigate("today")} nextLabel="完成本轮学习" />;
+    if (view === "phrase-quiz") return <QuizView key="phrase-quiz" title="词组无提示拼写" description="回车确认答案；答错后必须重新拼写，正确后才能进入下一题。整组全部订正正确后保存首次成绩。" questions={phraseSpellingQuestions} date={state.daily.date} online={online} onComplete={(results) => handleResults(results, "phraseSpelling")} onNext={() => navigate("today")} nextLabel="完成本轮学习" />;
     if (view === "comprehensive-practice") return <QuizView key={`comprehensive-${comprehensiveStart}`} title={`综合填词练习 · 第 ${comprehensiveStart}—${comprehensiveStart + activeComprehensiveExercises.length - 1} 题`} description="原资料 Part 3：根据句子中已给出的字母和缺失数量，填写完整英文单词。此处进度与每日词组学习分开保存。" questions={comprehensiveExerciseQuestions} date={state.daily.date} online={online} onComplete={handleComprehensiveResults} onNext={() => { setComprehensiveBatchStart(null); navigate("phrases"); }} nextLabel="返回词组库" />;
     if (view === "words") return <WordLibrary key={`words-${noteJump?.token ?? "normal"}`} items={vocabulary} learned={state.progress.learnedVocabulary} correctCounts={state.progress.selfSpellingCorrect} onCorrect={recordSelfSpellingCorrect} focusItemId={noteJump?.note.sourceKind === "word" ? noteJump.note.itemId : undefined} />;
     if (view === "phrases") return <PhraseLibrary key={`phrases-${noteJump?.token ?? "normal"}`} items={phrases} learned={state.progress.learnedPhrases} correctCounts={state.progress.selfSpellingCorrect} onCorrect={recordSelfSpellingCorrect} exerciseNextIndex={comprehensiveExerciseNextIndex} totalExercises={exercises.length} focusItemId={noteJump?.note.sourceKind === "phrase" ? noteJump.note.itemId : undefined} onStartComprehensive={() => { if (!comprehensiveUnlocked || comprehensiveExerciseNextIndex > exercises.length) return; setComprehensiveBatchStart(comprehensiveExerciseNextIndex); navigate("comprehensive-practice"); }} />;
@@ -856,7 +860,7 @@ function questionForReview(
 ): QuizQuestion | null {
   if (review.kind === "word_spelling") {
     const item = words.get(review.itemId);
-    return item ? { id: item.id, kind: review.kind, number, prompt: `${item.meaningsZh}（${item.partOfSpeech}）`, label: "请拼写：", note: { sourceKind: "word", itemId: item.id, field: "meaning", label: `${item.word} · 中文释义` } } : null;
+    return item ? { id: item.id, kind: review.kind, number, prompt: `${item.meaningsZh}（${item.partOfSpeech}）`, label: "请拼写：", acceptedAnswers: [item.word], note: { sourceKind: "word", itemId: item.id, field: "meaning", label: `${item.word} · 中文释义` } } : null;
   }
   if (review.kind === "word_cloze") {
     const item = words.get(review.itemId);
@@ -864,7 +868,7 @@ function questionForReview(
   }
   if (review.kind === "phrase_spelling") {
     const item = phrases.get(review.itemId);
-    return item ? { id: item.id, kind: review.kind, number, prompt: `${item.meaningZh}（${item.category}）`, label: "请拼写完整搭配：", note: { sourceKind: "phrase", itemId: item.id, field: "meaning", label: `${item.phrase} · 中文释义` } } : null;
+    return item ? { id: item.id, kind: review.kind, number, prompt: `${item.meaningZh}（${item.category}）`, label: "请拼写完整搭配：", acceptedAnswers: item.acceptedAnswers, note: { sourceKind: "phrase", itemId: item.id, field: "meaning", label: `${item.phrase} · 中文释义` } } : null;
   }
   const item = exercises.get(review.itemId);
   return item ? { id: item.id, kind: review.kind, number, prompt: item.prompt, label: "填写完整英文答案：" } : null;
@@ -979,7 +983,7 @@ function useSelfSpelling(items: Array<VocabularyItem | PhraseItem>, onCorrect: (
   const activePosition = items.findIndex((item) => item.id === spellingId);
 
   useEffect(() => {
-    if (spellingId && !spellingResult) spellingInputRef.current?.focus();
+    if (spellingId) spellingInputRef.current?.focus();
   }, [spellingId, spellingResult]);
 
   const restore = () => {
@@ -1019,6 +1023,13 @@ function useSelfSpelling(items: Array<VocabularyItem | PhraseItem>, onCorrect: (
     else restore();
   };
 
+  const advance = (item: VocabularyItem | PhraseItem) => {
+    const action = spellingAction(spellingResult, spellingAnswer);
+    if (action === "confirm") confirm(item);
+    else if (action === "retry") retry();
+    else if (action === "next") next();
+  };
+
   return {
     activeId: spellingId,
     answer: spellingAnswer,
@@ -1031,6 +1042,7 @@ function useSelfSpelling(items: Array<VocabularyItem | PhraseItem>, onCorrect: (
     retry,
     next,
     restore,
+    advance,
   };
 }
 
@@ -1041,9 +1053,9 @@ function SelfSpellingPanel({ item, spelling }: { item: VocabularyItem | PhraseIt
     <div className="library-spelling-panel">
       {!spelling.result ? (
         <>
-          <p>{isWord ? "请根据中文释义拼写英文" : "请根据中文释义填写完整词组"}；本次练习不计入错题。</p>
+          <p>{isWord ? "请根据中文释义拼写英文" : "请根据中文释义填写完整词组"}；回车确认，本次练习不计入错题。</p>
           <div className="spelling-action-row">
-            <button className="secondary-button" disabled={!spelling.answer.trim()} onClick={() => spelling.confirm(item)}>确认</button>
+            <button className="secondary-button" disabled={!spelling.answer.trim()} onClick={() => spelling.confirm(item)} onKeyDown={(event) => handleSpellingEnter(event, () => spelling.advance(item))}>确认</button>
             <button className="secondary-button" onClick={spelling.restore}>还原</button>
           </div>
         </>
@@ -1054,9 +1066,9 @@ function SelfSpellingPanel({ item, spelling }: { item: VocabularyItem | PhraseIt
           </p>
           <div className="spelling-action-row">
             {spelling.result === "wrong" ? (
-              <button className="secondary-button" onClick={spelling.retry}>重新拼写</button>
+              <button className="secondary-button" onClick={spelling.retry} onKeyDown={(event) => handleSpellingEnter(event, spelling.retry)}>重新拼写（回车）</button>
             ) : (
-              <button className="secondary-button" onClick={spelling.next}>{spelling.hasNext ? isWord ? "下一个单词" : "下一个词组" : "结束练习"}</button>
+              <button className="secondary-button" onClick={spelling.next} onKeyDown={(event) => handleSpellingEnter(event, spelling.next)}>{spelling.hasNext ? isWord ? "下一个单词" : "下一个词组" : "结束练习"}（回车）</button>
             )}
             <button className="secondary-button" onClick={spelling.restore}>还原</button>
           </div>
@@ -1083,15 +1095,13 @@ function WordLearning({ items, correctCounts, onCorrect, onDone }: { items: Voca
                     className="library-spelling-input study-spelling-input"
                     aria-label={`根据“${item.meaningsZh}”拼写英文单词`}
                     autoComplete="off"
-                    disabled={Boolean(spelling.result)}
+                    readOnly={Boolean(spelling.result)}
                     placeholder="请输入英文拼写"
                     ref={spelling.inputRef}
                     spellCheck={false}
                     value={spelling.answer}
                     onChange={(event) => spelling.setAnswer(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") spelling.confirm(item);
-                    }}
+                    onKeyDown={(event) => handleSpellingEnter(event, () => spelling.advance(item))}
                   />
                 ) : <h3 {...annotationProps("word", item.id, "word", `${item.word} · 单词`)}>{item.word}</h3>}
                 <span>{item.partOfSpeech}</span>
@@ -1123,7 +1133,7 @@ function PhraseCard({ item, spelling, correctCount, status }: { item: PhraseItem
   const active = spelling.activeId === item.id;
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (active && !spelling.result) inputRef.current?.focus();
+    if (active) inputRef.current?.focus();
   }, [active, spelling.result]);
   return (
     <article className={`phrase-card ${active ? "spelling-active" : ""}`}>
@@ -1137,15 +1147,13 @@ function PhraseCard({ item, spelling, correctCount, status }: { item: PhraseItem
               autoComplete="off"
               autoCapitalize="none"
               autoCorrect="off"
-              disabled={Boolean(spelling.result)}
+              readOnly={Boolean(spelling.result)}
               placeholder="请输入完整词组"
               ref={inputRef}
               spellCheck={false}
               value={spelling.answer}
               onChange={(event) => spelling.setAnswer(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.nativeEvent.isComposing) spelling.confirm(item);
-              }}
+              onKeyDown={(event) => handleSpellingEnter(event, () => spelling.advance(item))}
             />
           ) : <h3 {...annotationProps("phrase", item.id, "phrase", `${item.phrase} · 词组`)}>{item.phrase}</h3>}
           {!active && <button className="spelling-button" onClick={() => spelling.start(item.id)}>拼写</button>}
@@ -1192,7 +1200,10 @@ function QuizView({
   nextLabel: string;
 }) {
   const [quizQuestions] = useState(() => questions);
+  const sequential = quizQuestions.length > 0 && quizQuestions.every((item) =>
+    (item.kind === "word_spelling" || item.kind === "phrase_spelling") && item.acceptedAnswers?.length);
   const draftKey = `toefl-draft:${date}:${quizQuestions.map((item) => `${item.kind}-${item.id}`).join("|")}`;
+  const sequenceDraftKey = `${draftKey}:stepwise-v1`;
   const [answers, setAnswers] = useState<Record<string, string>>(() => {
     if (typeof localStorage === "undefined") return {};
     try {
@@ -1203,6 +1214,13 @@ function QuizView({
       return {};
     }
   });
+  const [sequence, setSequence] = useState(() => {
+    let saved: unknown = null;
+    try {
+      if (typeof localStorage !== "undefined") saved = JSON.parse(localStorage.getItem(sequenceDraftKey) ?? "null");
+    } catch { /* Keep the older answer draft when a stepwise draft is unreadable. */ }
+    return restoreSpellingSession(quizQuestions, saved, answers);
+  });
   const [results, setResults] = useState<GradeResult[] | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -1211,6 +1229,20 @@ function QuizView({
   const [correctionFeedback, setCorrectionFeedback] = useState<Record<string, "wrong" | "correct">>({});
   const [correctedKeys, setCorrectedKeys] = useState<string[]>([]);
   const completedOnce = useRef(false);
+  const submittingRef = useRef(false);
+  const sequenceInputRef = useRef<HTMLInputElement>(null);
+  const nextButtonRef = useRef<HTMLButtonElement>(null);
+  const firstAnswers = sequential ? firstSpellingAnswers(sequence, quizQuestions) : answers;
+  const activeIndex = Math.min(sequence.index, quizQuestions.length - 1);
+  const activeQuestion = quizQuestions[activeIndex];
+  const activeKey = activeQuestion ? `${activeQuestion.kind}:${activeQuestion.id}` : "";
+  const activeFeedback = activeQuestion ? sequence.entries[activeKey]?.feedback : null;
+
+  useEffect(() => {
+    if (!sequential) return;
+    if (results) nextButtonRef.current?.focus();
+    else sequenceInputRef.current?.focus();
+  }, [sequential, sequence.index, activeFeedback, results, submitting]);
 
   const completeOnce = (gradedResults: GradeResult[]) => {
     if (completedOnce.current) return;
@@ -1219,20 +1251,25 @@ function QuizView({
   };
 
   useEffect(() => {
-    if (!results) localStorage.setItem(draftKey, JSON.stringify(answers));
-  }, [answers, draftKey, results]);
+    if (results) return;
+    try {
+      if (sequential) localStorage.setItem(sequenceDraftKey, JSON.stringify(sequence));
+      else localStorage.setItem(draftKey, JSON.stringify(answers));
+    } catch { /* Storage restrictions must not interrupt typing. */ }
+  }, [answers, draftKey, results, sequence, sequenceDraftKey, sequential]);
 
-  const submit = async () => {
-    if (submitting || results) return;
+  const submit = async (submittedAnswers = answers) => {
+    if (submittingRef.current || results) return;
     if (!online) {
       setError("当前离线：答案草稿已保留，联网后才能正式提交并写入云端记录。");
       return;
     }
-    const missing = quizQuestions.filter((item) => !(answers[`${item.kind}:${item.id}`] ?? "").trim());
+    const missing = quizQuestions.filter((item) => !(submittedAnswers[`${item.kind}:${item.id}`] ?? "").trim());
     if (missing.length) {
       setError(`还有 ${missing.length} 题未填写。整组完成后才能统一提交。`);
       return;
     }
+    submittingRef.current = true;
     setSubmitting(true);
     setError("");
     setNeedsLogin(false);
@@ -1248,14 +1285,23 @@ function QuizView({
         signal: controller.signal,
         body: JSON.stringify({
           sessionId: `${date}:${quizQuestions[0]?.kind ?? "review"}:${crypto.randomUUID()}`,
-          items: quizQuestions.map((item) => ({ id: item.id, kind: item.kind, answer: answers[`${item.kind}:${item.id}`] ?? "" })),
+          items: quizQuestions.map((item) => ({ id: item.id, kind: item.kind, answer: submittedAnswers[`${item.kind}:${item.id}`] ?? "" })),
         }),
       });
       const gradedResults = await readGradeResults(response, quizQuestions);
+      if (sequential && gradedResults.some((result) => {
+        const question = quizQuestions.find((item) => item.id === result.id && item.kind === result.kind)!;
+        return result.correct !== matchesSelfSpelling(submittedAnswers[`${result.kind}:${result.id}`], question.acceptedAnswers ?? []);
+      })) {
+        throw new GradingResponseError("当前资料与评分版本不一致。答案草稿已保留，请刷新后重试。");
+      }
       setResults(gradedResults);
-      localStorage.removeItem(draftKey);
+      try {
+        localStorage.removeItem(draftKey);
+        if (sequential) localStorage.removeItem(sequenceDraftKey);
+      } catch { /* Saving official results does not depend on device storage. */ }
       const hasWrongWordSpelling = gradedResults.some((item) => item.kind === "word_spelling" && !item.correct);
-      if (!hasWrongWordSpelling) completeOnce(gradedResults);
+      if (sequential || !hasWrongWordSpelling) completeOnce(gradedResults);
     } catch (submissionError) {
       if (submissionError instanceof GradingResponseError) {
         setError(submissionError.message);
@@ -1267,15 +1313,26 @@ function QuizView({
       }
     } finally {
       window.clearTimeout(timeout);
+      submittingRef.current = false;
       setSubmitting(false);
+    }
+  };
+
+  const advanceSequence = () => {
+    if (submittingRef.current || results) return;
+    const nextSequence = advanceSpellingSession(sequence, quizQuestions);
+    setSequence(nextSequence);
+    setError("");
+    if (nextSequence.index === quizQuestions.length) {
+      void submit(firstSpellingAnswers(nextSequence, quizQuestions));
     }
   };
 
   const resultMap = useMemo(() => new Map(results?.map((item) => [`${item.kind}:${item.id}`, item]) ?? []), [results]);
   const correctCount = results?.filter((item) => item.correct).length ?? 0;
   const wrongWordResults = useMemo(
-    () => results?.filter((item) => item.kind === "word_spelling" && !item.correct) ?? [],
-    [results],
+    () => sequential ? [] : results?.filter((item) => item.kind === "word_spelling" && !item.correct) ?? [],
+    [results, sequential],
   );
   const pendingCorrectionCount = wrongWordResults.filter((item) => !correctedKeys.includes(`${item.kind}:${item.id}`)).length;
 
@@ -1295,19 +1352,39 @@ function QuizView({
 
   return (
     <section className="quiz-page">
-      <div className="section-intro"><span className="pill">整组提交 · {quizQuestions.length} 题</span><h2>{title}</h2><p>{description}</p></div>
-      {results && <section className="result-summary"><div><span>本组成绩</span><strong>{correctCount} / {results.length}</strong></div><p>{correctCount === results.length ? "全部正确，这一组很稳。" : wrongWordResults.length > 0 ? `有 ${wrongWordResults.length} 个单词需要订正。本轮每个错词只记 1 次，订正中的错误不会重复计数。` : `有 ${results.length - correctCount} 题已加入对应的错题类别，下面已给出完整解释。`}</p></section>}
+      <div className="section-intro"><span className="pill">{sequential ? results ? "本组完成" : `逐题拼写 · ${activeIndex + 1} / ${quizQuestions.length}` : `整组提交 · ${quizQuestions.length} 题`}</span><h2>{title}</h2><p>{description}</p></div>
+      {results && <section className="result-summary"><div><span>{sequential ? "首次作答成绩" : "本组成绩"}</span><strong>{correctCount} / {results.length}</strong></div><p>{correctCount === results.length ? "全部正确，这一组很稳。" : sequential ? `有 ${results.length - correctCount} 题首次答错，现已全部订正；每题只记 1 次错误。` : wrongWordResults.length > 0 ? `有 ${wrongWordResults.length} 个单词需要订正。本轮每个错词只记 1 次，订正中的错误不会重复计数。` : `有 ${results.length - correctCount} 题已加入对应的错题类别，下面已给出完整解释。`}</p></section>}
       <div className="question-list">
         {quizQuestions.map((question, index) => {
+          if (sequential && !results && index !== activeIndex) return null;
           const key = `${question.kind}:${question.id}`;
           const result = resultMap.get(key);
+          const entry = sequence.entries[key];
+          const feedback = sequential && !results ? entry?.feedback : null;
           return (
-            <article className={`question-card ${result ? result.correct ? "correct" : "wrong" : ""}`} key={key}>
-              <div className="question-meta"><span>{index + 1}</span><small>{result ? result.correct ? "正确" : "需要订正" : `资料题号 ${question.number}`}</small></div>
+            <article className={`question-card ${result ? result.correct ? "correct" : "wrong" : feedback ?? ""}`} key={key}>
+              <div className="question-meta"><span>{index + 1}</span><small>{result ? result.correct ? "首次正确" : sequential ? "已订正" : "需要订正" : feedback ? feedback === "correct" ? "拼写正确" : "拼写错误" : `资料题号 ${question.number}`}</small></div>
               <p className="question-prompt" {...(question.note ? annotationProps(question.note.sourceKind, question.note.itemId, question.note.field, question.note.label) : {})}>{question.prompt}</p>
-              <label><span>{question.label}</span><input autoComplete="off" spellCheck={false} disabled={Boolean(results)} value={answers[key] ?? ""} onChange={(event) => setAnswers((current) => ({ ...current, [key]: event.target.value }))} /></label>
+              <label><span>{question.label}</span>{sequential && !results ? (
+                <input
+                  ref={sequenceInputRef}
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  readOnly={Boolean(feedback) || submitting || sequence.index === quizQuestions.length}
+                  value={entry?.answer ?? ""}
+                  onChange={(event) => setSequence((current) => editSpellingAnswer(current, quizQuestions, event.target.value))}
+                  onKeyDown={(event) => handleSpellingEnter(event, advanceSequence)}
+                />
+              ) : <input autoComplete="off" spellCheck={false} disabled={Boolean(results)} value={firstAnswers[key] ?? ""} onChange={(event) => setAnswers((current) => ({ ...current, [key]: event.target.value }))} />}</label>
+              {sequential && !results && (
+                <div className="stepwise-feedback" aria-live="polite">
+                  {feedback ? <p className={`spelling-feedback ${feedback}`}>{feedback === "correct" ? "拼写正确" : "拼写错误"}，正确拼写：<strong>{question.acceptedAnswers?.[0]}</strong></p> : <p>{entry?.firstAnswer !== undefined ? "请重新拼写；本题的错误只记录一次。" : "输入后按回车确认。"}</p>}
+                </div>
+              )}
               {result && !result.correct && <WrongExplanation result={result} />}
-              {result && !result.correct && result.kind === "word_spelling" && (
+              {result && !result.correct && result.kind === "word_spelling" && !sequential && (
                 <div className={`correction-box ${correctedKeys.includes(key) ? "correct" : correctionFeedback[key] === "wrong" ? "wrong" : ""}`}>
                   <label>
                     <span>{correctedKeys.includes(key) ? "订正完成" : "请重新拼写这个单词，正确后才能继续："}</span>
@@ -1333,7 +1410,11 @@ function QuizView({
       </div>
       {error && <div className="form-error" role="alert">{error}{needsLogin && <button className="secondary-button" onClick={() => window.location.reload()}>刷新并重新登录</button>}</div>}
       <div className="quiz-submit">
-        {!results ? <button className="primary-button" disabled={submitting || !quizQuestions.length} onClick={submit}>{submitting ? "正在统一批改…" : `${error ? "重试" : ""}提交整组 ${quizQuestions.length} 题`}</button> : <button className="primary-button" disabled={pendingCorrectionCount > 0} onClick={onNext}>{pendingCorrectionCount > 0 ? `还需订正 ${pendingCorrectionCount} 个单词` : `${nextLabel} →`}</button>}
+        {!results ? sequential ? (
+          <button className="primary-button" disabled={submitting || !activeQuestion || (!activeFeedback && !(sequence.entries[activeKey]?.answer ?? "").trim())} onClick={advanceSequence} onKeyDown={(event) => handleSpellingEnter(event, advanceSequence)}>
+            {submitting ? "正在保存本组成绩…" : sequence.index === quizQuestions.length ? "重试提交本组（回车）" : activeFeedback === "wrong" ? "重新拼写（回车）" : activeFeedback === "correct" ? activeIndex === quizQuestions.length - 1 ? "提交本组（回车）" : "下一题（回车）" : "确认（回车）"}
+          </button>
+        ) : <button className="primary-button" disabled={submitting || !quizQuestions.length} onClick={() => void submit()}>{submitting ? "正在统一批改…" : `${error ? "重试" : ""}提交整组 ${quizQuestions.length} 题`}</button> : <button ref={nextButtonRef} className="primary-button" disabled={pendingCorrectionCount > 0} onClick={onNext} onKeyDown={(event) => handleSpellingEnter(event, () => { if (!pendingCorrectionCount) onNext(); })}>{pendingCorrectionCount > 0 ? `还需订正 ${pendingCorrectionCount} 个单词` : `${nextLabel} →`}</button>}
         {!results && <small>大小写和首尾空格不影响判定；拼写、词形、词序和介词严格检查。</small>}
       </div>
     </section>
@@ -1385,15 +1466,13 @@ function WordLibrary({ items, learned, correctCounts, onCorrect, focusItemId }: 
                       className="library-spelling-input"
                       aria-label={`根据“${item.meaningsZh}”拼写英文单词`}
                       autoComplete="off"
-                      disabled={Boolean(spelling.result)}
+                      readOnly={Boolean(spelling.result)}
                       placeholder="请输入英文拼写"
                       ref={spelling.inputRef}
                       spellCheck={false}
                       value={spelling.answer}
                       onChange={(event) => spelling.setAnswer(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") spelling.confirm(item);
-                      }}
+                      onKeyDown={(event) => handleSpellingEnter(event, () => spelling.advance(item))}
                     />
                   ) : <strong {...annotationProps("word", item.id, "word", `${item.word} · 单词`)}>{item.word}</strong>}
                   <small>{item.partOfSpeech} <span {...annotationProps("word", item.id, "meaning", `${item.word} · 中文释义`)}>{item.meaningsZh}</span></small>
